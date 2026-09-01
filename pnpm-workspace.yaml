@@ -1,0 +1,12 @@
+packages:
+  - 'packages/*'
+  - 'apps/*'
+
+autoInstallPeers: false
+strictPeerDependencies: true
+engineStrict: false
+shamefullyHoist: false
+
+allowBuilds:
+  esbuild: true
+  msw: true
