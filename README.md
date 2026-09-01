@@ -3,7 +3,7 @@
 [![CI](https://github.com/stellar-x402-mcp/monorepo/actions/workflows/ci.yml/badge.svg)](https://github.com/stellar-x402-mcp/monorepo/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
-`stellar-x402-mcp` is an open-source Model Context Protocol (MCP) server and agent-monetization framework for the Stellar blockchain. It equips autonomous AI agents with typed, validated tools for inspecting ledger state, checking SAC token balances, simulating and invoking Soroban smart contracts, and executing DEX path payments across Stellar networks. Additionally, it provides `@x402Paywall`, an open-source decorator and middleware layer that enables any MCP server developer to monetize their custom AI tools with instant, pay-per-call Stellar stablecoin settlements, unlocking trustless machine-to-machine commerce for the decentralized AI economy.
+`stellar-x402-mcp` is an open-source Model Context Protocol (MCP) server and agent-monetization framework for the Stellar blockchain. It equips autonomous AI agents with typed, validated tools for inspecting ledger state, checking SAC token balances, simulating and invoking Soroban smart contracts, and executing DEX path payments across Stellar networks. Additionally, it provides `@x402Paywall`, an open-source decorator and middleware layer that enables any MCP server developer to monetize their custom AI tools with instant, pay-per-call Stellar stablecoin settlements, enabling trustless machine-to-machine commerce for the decentralized AI economy.
 
 ## Packages
 
