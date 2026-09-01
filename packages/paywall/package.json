@@ -1,0 +1,28 @@
+{
+  "name": "@stellar-mcp/paywall",
+  "version": "0.1.0",
+  "description": "x402 Paywall decorator for monetizing Model Context Protocol (MCP) tools on Stellar",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "tsup": "^8.3.5",
+    "typescript": "^5.9.2",
+    "vitest": "^2.1.4"
+  }
+}
