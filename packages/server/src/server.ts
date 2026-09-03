@@ -6,6 +6,12 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import { GetBalanceSchema, handleGetBalance } from './tools/account.js';
 import { SimulateContractSchema, handleSimulateContract } from './tools/contract.js';
+import {
+  FindPaymentPathsSchema,
+  handleFindPaymentPaths,
+  SubmitTransactionSchema,
+  handleSubmitTransaction,
+} from './tools/payment.js';
 
 export interface ServerConfig {
   horizonUrl?: string;
@@ -57,6 +63,33 @@ export function createStellarMcpServer(config?: ServerConfig) {
             required: ['contractId', 'method'],
           },
         },
+        {
+          name: 'stellar_find_payment_paths',
+          description: 'Find strict-receive DEX payment paths and source token amounts',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              sourceAccount: { type: 'string', description: 'Sender Stellar G... public key' },
+              destinationAccount: { type: 'string', description: 'Recipient Stellar G... public key' },
+              destinationAsset: { type: 'string', description: '"native" or "CODE:ISSUER"' },
+              destinationAmount: { type: 'string', description: 'Amount recipient receives' },
+              network: { type: 'string', enum: ['testnet', 'pubnet'], default: 'testnet' },
+            },
+            required: ['sourceAccount', 'destinationAccount', 'destinationAsset', 'destinationAmount'],
+          },
+        },
+        {
+          name: 'stellar_submit_transaction',
+          description: 'Submit a signed transaction envelope XDR to the Stellar network',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              signedEnvelopeXdr: { type: 'string', description: 'Base64 signed envelope XDR' },
+              network: { type: 'string', enum: ['testnet', 'pubnet'], default: 'testnet' },
+            },
+            required: ['signedEnvelopeXdr'],
+          },
+        },
       ],
     };
   });
@@ -75,6 +108,22 @@ export function createStellarMcpServer(config?: ServerConfig) {
     if (name === 'soroban_simulate_contract') {
       const parsed = SimulateContractSchema.parse(args);
       const result = await handleSimulateContract(parsed, sorobanRpcUrl);
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
+    }
+
+    if (name === 'stellar_find_payment_paths') {
+      const parsed = FindPaymentPathsSchema.parse(args);
+      const result = await handleFindPaymentPaths(parsed, horizonUrl);
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
+    }
+
+    if (name === 'stellar_submit_transaction') {
+      const parsed = SubmitTransactionSchema.parse(args);
+      const result = await handleSubmitTransaction(parsed, horizonUrl);
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
       };
