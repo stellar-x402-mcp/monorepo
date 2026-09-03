@@ -1,9 +1,12 @@
 # stellar-x402-mcp
 
 [![CI](https://github.com/stellar-x402-mcp/monorepo/actions/workflows/ci.yml/badge.svg)](https://github.com/stellar-x402-mcp/monorepo/actions/workflows/ci.yml)
+[![Docs](https://img.shields.io/badge/docs-x402--stellar.mintlify.app-blue.svg)](https://x402-stellar.mintlify.app)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
 stellar-x402-mcp is an MCP server and tool monetization library for the Stellar network. It gives AI models structured tools to read account balances, inspect Soroban state, simulate transactions, and execute DEX path payments. It also exports the @x402Tool decorator, which lets tool authors charge AI agents micro-fees in Stellar stablecoins for each tool call, with built-in spending limits and automated signing on the client side.
+
+Documentation and API reference: [https://x402-stellar.mintlify.app](https://x402-stellar.mintlify.app)
 
 ## Packages
 
