@@ -22,7 +22,12 @@ import {
   handleSwapTokens,
 } from './tools/payment.js';
 import { QueryEventsSchema, handleQueryEvents } from './tools/events.js';
-import { GetLatestLedgerSchema, handleGetLatestLedger } from './tools/network.js';
+import {
+  GetLatestLedgerSchema,
+  handleGetLatestLedger,
+  GetNetworkSchema,
+  handleGetNetwork,
+} from './tools/network.js';
 
 export interface ServerConfig {
   horizonUrl?: string;
@@ -192,6 +197,16 @@ export function createStellarMcpServer(config?: ServerConfig) {
             },
           },
         },
+        {
+          name: 'soroban_get_network',
+          description: 'Get Soroban network passphrase, protocol version, and friendbot URL',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              network: { type: 'string', enum: ['testnet', 'pubnet'], default: 'testnet' },
+            },
+          },
+        },
       ],
     };
   });
@@ -266,6 +281,14 @@ export function createStellarMcpServer(config?: ServerConfig) {
     if (name === 'soroban_get_latest_ledger') {
       const parsed = GetLatestLedgerSchema.parse(args || {});
       const result = await handleGetLatestLedger(parsed, sorobanRpcUrl);
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
+    }
+
+    if (name === 'soroban_get_network') {
+      const parsed = GetNetworkSchema.parse(args || {});
+      const result = await handleGetNetwork(parsed, sorobanRpcUrl);
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
       };

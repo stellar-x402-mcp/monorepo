@@ -11,7 +11,7 @@ import {
   handleSwapTokens,
 } from '../src/tools/payment.js';
 import { handleQueryEvents } from '../src/tools/events.js';
-import { handleGetLatestLedger } from '../src/tools/network.js';
+import { handleGetLatestLedger, handleGetNetwork } from '../src/tools/network.js';
 
 describe('Stellar MCP Server Tools', () => {
   it('should parse and format account balances from Horizon', async () => {
@@ -460,5 +460,44 @@ describe('Stellar MCP Server Tools', () => {
 
     expect(result.error).toBe('Internal RPC error');
     expect(result.code).toBe(-32603);
+  });
+
+  it('should fetch network passphrase, protocol version, and friendbot URL from Soroban RPC', async () => {
+    const mockRpc = 'https://rpc.mock';
+    const mockNetworkData = {
+      friendbotUrl: 'https://friendbot.stellar.org',
+      passphrase: 'Test SDF Network ; September 2015',
+      protocolVersion: 21,
+    };
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ result: mockNetworkData }),
+    });
+
+    const result = await handleGetNetwork({ network: 'testnet' }, mockRpc);
+
+    expect(result.friendbotUrl).toBe('https://friendbot.stellar.org');
+    expect(result.passphrase).toBe('Test SDF Network ; September 2015');
+    expect(result.protocolVersion).toBe(21);
+  });
+
+  it('should handle RPC errors gracefully when querying getNetwork', async () => {
+    const mockRpc = 'https://rpc.mock';
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        error: {
+          code: -32600,
+          message: 'Invalid Request',
+        },
+      }),
+    });
+
+    const result = await handleGetNetwork({ network: 'testnet' }, mockRpc);
+
+    expect(result.error).toBe('Invalid Request');
+    expect(result.code).toBe(-32600);
   });
 });

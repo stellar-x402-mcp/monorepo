@@ -41,3 +41,45 @@ export async function handleGetLatestLedger(
     return { error: err.message };
   }
 }
+
+export const GetNetworkSchema = z.object({
+  network: z.enum(['testnet', 'pubnet']).default('testnet').describe('Stellar network'),
+});
+
+export async function handleGetNetwork(
+  _args: z.infer<typeof GetNetworkSchema>,
+  sorobanRpcUrl: string
+) {
+  try {
+    const payload = {
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'getNetwork',
+      params: {},
+    };
+
+    const res = await fetch(sorobanRpcUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    const data: any = await res.json();
+    if (data.error) {
+      return {
+        error: data.error.message || 'Soroban RPC error',
+        code: data.error.code,
+      };
+    }
+
+    const result = data.result || {};
+    return {
+      friendbotUrl: result.friendbotUrl,
+      passphrase: result.passphrase,
+      protocolVersion: result.protocolVersion,
+      ...result,
+    };
+  } catch (err: any) {
+    return { error: err.message };
+  }
+}
