@@ -16,6 +16,7 @@ import {
 import { handleQueryEvents } from '../src/tools/events.js';
 import { handleGetLatestLedger, handleGetNetwork } from '../src/tools/network.js';
 import { handleGetOrderbook, handleGetLiquidityPools } from '../src/tools/dex.js';
+import { handleGetClaimableBalances } from '../src/tools/claimable.js';
 
 describe('Stellar MCP Server Tools', () => {
   it('should parse and format account balances from Horizon', async () => {
@@ -901,5 +902,95 @@ describe('Stellar MCP Server Tools', () => {
 
     expect(result.id).toBe('001041ac1d61419a62e0c0152e59f13aff7f8f65c2f04c1371ebbc662b31f4ab');
     expect(result.feeBp).toBe(30);
+  });
+
+  it('should fetch and parse claimable balances by claimant', async () => {
+    const mockHorizon = 'https://horizon.mock';
+    const claimantAddress = 'GDSHZPWSL5QBQKKDQNECFPI2PF7JQUACNWG65PMFOK6G5V4QBH4CX2KH';
+    const mockClaimableResponse = {
+      _embedded: {
+        records: [
+          {
+            id: '00000000075fa23e035da964f3f85009de47b381011e44d73c32012e2c56689b38fb816b',
+            asset: 'native',
+            amount: '25.0000000',
+            sponsor: 'GA3AMQY5WWFUE3ZCN4XJOFT7QK7ZROMCJAEB2YZBVNONCHU272275UUD',
+            claimants: [
+              {
+                destination: claimantAddress,
+                predicate: { unconditional: true },
+              },
+            ],
+            last_modified_ledger: 105990,
+            last_modified_time: '2026-07-13T23:25:07Z',
+            flags: { clawback_enabled: false },
+          },
+        ],
+      },
+    };
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => mockClaimableResponse,
+    });
+
+    const result = await handleGetClaimableBalances(
+      {
+        claimant: claimantAddress,
+        limit: 10,
+        network: 'testnet',
+      },
+      mockHorizon
+    );
+
+    expect(result.count).toBe(1);
+    expect(result.records[0].id).toBe('00000000075fa23e035da964f3f85009de47b381011e44d73c32012e2c56689b38fb816b');
+    expect(result.records[0].amount).toBe('25.0000000');
+    expect(result.records[0].claimants[0].destination).toBe(claimantAddress);
+  });
+
+  it('should build unsigned claim transaction envelope when requested', async () => {
+    const mockHorizon = 'https://horizon.mock';
+    const kp = Keypair.random();
+    const claimantAddress = kp.publicKey();
+    const balanceId = '00000000075fa23e035da964f3f85009de47b381011e44d73c32012e2c56689b38fb816b';
+
+    const mockSingleBalance = {
+      id: balanceId,
+      asset: 'native',
+      amount: '50.0000000',
+      sponsor: 'GA3AMQY5WWFUE3ZCN4XJOFT7QK7ZROMCJAEB2YZBVNONCHU272275UUD',
+      claimants: [{ destination: claimantAddress, predicate: { unconditional: true } }],
+      last_modified_ledger: 105990,
+      last_modified_time: '2026-07-13T23:25:07Z',
+      flags: { clawback_enabled: false },
+    };
+
+    global.fetch = vi.fn().mockImplementation(async (url: string) => {
+      if (url.includes('/accounts/')) {
+        return {
+          ok: true,
+          json: async () => ({ sequence: '1000' }),
+        };
+      }
+      return {
+        ok: true,
+        json: async () => mockSingleBalance,
+      };
+    });
+
+    const result = await handleGetClaimableBalances(
+      {
+        balanceId,
+        claimant: claimantAddress,
+        buildClaimEnvelope: true,
+        network: 'testnet',
+      },
+      mockHorizon
+    );
+
+    expect(result.id).toBe(balanceId);
+    expect(result.unsignedEnvelopeXdr).toBeDefined();
+    expect(typeof result.unsignedEnvelopeXdr).toBe('string');
   });
 });

@@ -38,6 +38,10 @@ import {
   GetLiquidityPoolsSchema,
   handleGetLiquidityPools,
 } from './tools/dex.js';
+import {
+  GetClaimableBalancesSchema,
+  handleGetClaimableBalances,
+} from './tools/claimable.js';
 
 export interface ServerConfig {
   horizonUrl?: string;
@@ -298,6 +302,24 @@ export function createStellarMcpServer(config?: ServerConfig) {
             },
           },
         },
+        {
+          name: 'stellar_get_claimable_balances',
+          description: 'Query and inspect Stellar claimable balances, claimants, predicates, and optionally build unsigned claim transaction envelopes',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              claimant: { type: 'string', description: 'Filter by claimant Stellar account address (G...)' },
+              sponsor: { type: 'string', description: 'Filter by sponsor Stellar account address (G...)' },
+              asset: { type: 'string', description: 'Filter by asset format "native" or "CODE:ISSUER"' },
+              balanceId: { type: 'string', description: 'Specific claimable balance ID to query' },
+              buildClaimEnvelope: { type: 'boolean', default: false, description: 'If true and claimant provided, build unsigned claim transaction envelope' },
+              cursor: { type: 'string', description: 'Pagination cursor' },
+              limit: { type: 'integer', minimum: 1, maximum: 200, default: 20, description: 'Number of records to return' },
+              order: { type: 'string', enum: ['asc', 'desc'], default: 'desc' },
+              network: { type: 'string', enum: ['testnet', 'pubnet'], default: 'testnet' },
+            },
+          },
+        },
       ],
     };
   });
@@ -412,6 +434,14 @@ export function createStellarMcpServer(config?: ServerConfig) {
     if (name === 'stellar_get_liquidity_pools') {
       const parsed = GetLiquidityPoolsSchema.parse(args || {});
       const result = await handleGetLiquidityPools(parsed, horizonUrl);
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
+    }
+
+    if (name === 'stellar_get_claimable_balances') {
+      const parsed = GetClaimableBalancesSchema.parse(args || {});
+      const result = await handleGetClaimableBalances(parsed, horizonUrl);
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
       };
