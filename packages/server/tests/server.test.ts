@@ -15,6 +15,7 @@ import {
 } from '../src/tools/payment.js';
 import { handleQueryEvents } from '../src/tools/events.js';
 import { handleGetLatestLedger, handleGetNetwork } from '../src/tools/network.js';
+import { handleGetOrderbook } from '../src/tools/dex.js';
 
 describe('Stellar MCP Server Tools', () => {
   it('should parse and format account balances from Horizon', async () => {
@@ -764,5 +765,64 @@ describe('Stellar MCP Server Tools', () => {
 
     expect(result.found).toBe(false);
     expect(result.message).toContain('not found');
+  });
+
+  it('should fetch and parse orderbook with bids, asks, spread, and depth', async () => {
+    const mockHorizon = 'https://horizon.mock';
+    const mockOrderbookResponse = {
+      bids: [
+        { price_r: { n: 27, d: 250 }, price: '0.1080000', amount: '64944.5984490' },
+        { price_r: { n: 1, d: 10 }, price: '0.1000000', amount: '30.0000000' },
+      ],
+      asks: [
+        { price_r: { n: 3, d: 25 }, price: '0.1200000', amount: '8.8719417' },
+        { price_r: { n: 19, d: 40 }, price: '0.4750000', amount: '1.0000000' },
+      ],
+      base: { asset_type: 'native' },
+      counter: {
+        asset_type: 'credit_alphanum4',
+        asset_code: 'USDC',
+        asset_issuer: 'GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5',
+      },
+    };
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => mockOrderbookResponse,
+    });
+
+    const result = await handleGetOrderbook(
+      {
+        sellingAsset: 'native',
+        buyingAsset: 'USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5',
+        limit: 20,
+        network: 'testnet',
+      },
+      mockHorizon
+    );
+
+    expect(result.bestBid).toBe('0.1080000');
+    expect(result.bestAsk).toBe('0.1200000');
+    expect(result.spread).toBe('0.0120000');
+    expect(result.spreadPercentage).toBe('11.1111%');
+    expect(result.bidsCount).toBe(2);
+    expect(result.asksCount).toBe(2);
+    expect(result.base.asset_type).toBe('native');
+  });
+
+  it('should return validation error for malformed asset strings', async () => {
+    const mockHorizon = 'https://horizon.mock';
+
+    const result = await handleGetOrderbook(
+      {
+        sellingAsset: 'INVALID_ASSET_WITHOUT_ISSUER',
+        buyingAsset: 'native',
+        limit: 20,
+        network: 'testnet',
+      },
+      mockHorizon
+    );
+
+    expect(result.error).toContain('Invalid sellingAsset format');
   });
 });

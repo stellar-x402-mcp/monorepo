@@ -32,6 +32,7 @@ import {
   GetNetworkSchema,
   handleGetNetwork,
 } from './tools/network.js';
+import { GetOrderbookSchema, handleGetOrderbook } from './tools/dex.js';
 
 export interface ServerConfig {
   horizonUrl?: string;
@@ -258,6 +259,20 @@ export function createStellarMcpServer(config?: ServerConfig) {
             required: ['contractId'],
           },
         },
+        {
+          name: 'stellar_get_orderbook',
+          description: 'Get real-time Stellar DEX orderbook bids, asks, and price spread analysis for any asset pair',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              sellingAsset: { type: 'string', description: 'Asset being sold: "native" or "CODE:ISSUER"' },
+              buyingAsset: { type: 'string', description: 'Asset being bought: "native" or "CODE:ISSUER"' },
+              limit: { type: 'integer', minimum: 1, maximum: 200, default: 20, description: 'Depth of orders to fetch' },
+              network: { type: 'string', enum: ['testnet', 'pubnet'], default: 'testnet' },
+            },
+            required: ['sellingAsset', 'buyingAsset'],
+          },
+        },
       ],
     };
   });
@@ -356,6 +371,14 @@ export function createStellarMcpServer(config?: ServerConfig) {
     if (name === 'soroban_read_storage') {
       const parsed = ReadStorageSchema.parse(args);
       const result = await handleReadStorage(parsed, sorobanRpcUrl);
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
+    }
+
+    if (name === 'stellar_get_orderbook') {
+      const parsed = GetOrderbookSchema.parse(args);
+      const result = await handleGetOrderbook(parsed, horizonUrl);
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
       };
