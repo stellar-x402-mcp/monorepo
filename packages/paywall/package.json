@@ -20,7 +20,11 @@
   "dependencies": {
     "zod": "^3.23.8"
   },
+  "peerDependencies": {
+    "@stellar/stellar-sdk": ">=16.2.0 <17.0.0"
+  },
   "devDependencies": {
+    "@stellar/stellar-sdk": "16.2.0",
     "tsup": "^8.3.5",
     "typescript": "^5.9.2",
     "vitest": "^2.1.4"
