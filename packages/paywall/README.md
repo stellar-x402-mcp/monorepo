@@ -8,6 +8,7 @@ Decorator, verifier, and middleware framework to monetize custom Model Context P
 - `ReplayProtector`: In-memory and cache-backed storage preventing duplicate submission of the same transaction hash with TTL expiration and LRU eviction.
 - `PaymentChallengeGenerator`: Standardized generator for SEP-0043 / x402-compliant cryptographic challenges, nonces, and HTTP authentication headers.
 - `DynamicPricingEngine`: Flexible pricing engine supporting fixed rates, token-based meter pricing, tiered usage brackets, and dynamic compute functions.
+- `Framework Middlewares`: Ready-to-use middleware for Express (`x402Express`), Fastify (`x402Fastify`), and Hono / Web Standards (`x402Hono`).
 
 ## Usage
 
@@ -103,4 +104,30 @@ const pricing = new DynamicPricingEngine({
 
 const price = await pricing.calculatePrice({ tokens: 1500 });
 // Returns exact price formatted to Stellar stroop precision (e.g. "0.0160000")
+```
+
+### Web Framework Middlewares (`x402Express`, `x402Fastify`, `x402Hono`)
+
+Protect standard HTTP API routes with x402 micro-payment negotiation:
+
+```ts
+import express from 'express';
+import { x402Express } from '@stellar-mcp/paywall';
+
+const app = express();
+
+app.use(
+  '/api/v1/analyze',
+  x402Express({
+    recipient: 'GCALKSGAZRJLSUEJT3M5W6LN4R7XQOLIRCOS6ZA6EDZVTZDBIIPPFKJ6',
+    price: '0.05',
+    asset: 'native',
+  })
+);
+
+app.post('/api/v1/analyze', (req, res) => {
+  // Access verified on-chain payment context
+  const payment = req.x402;
+  res.json({ result: 'analysis complete', payer: payment.payer });
+});
 ```

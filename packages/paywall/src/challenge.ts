@@ -29,12 +29,12 @@ export interface ChallengeGeneratorConfig {
 
 export interface CreateChallengeOptions {
   price: string;
-  recipient?: string;
-  asset?: string;
-  network?: 'stellar:pubnet' | 'stellar:testnet' | 'stellar:futurenet';
-  validForSeconds?: number;
-  resource?: string;
-  description?: string;
+  recipient?: string | undefined;
+  asset?: string | undefined;
+  network?: ('stellar:pubnet' | 'stellar:testnet' | 'stellar:futurenet') | undefined;
+  validForSeconds?: number | undefined;
+  resource?: string | undefined;
+  description?: string | undefined;
 }
 
 export class PaymentChallengeGenerator {

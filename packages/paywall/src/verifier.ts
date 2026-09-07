@@ -9,9 +9,9 @@ export interface VerifierConfig {
 export interface VerifyPaymentOptions {
   expectedRecipient: string;
   expectedPrice: string;
-  expectedAsset?: string;
-  expectedMemo?: string;
-  maxAgeSeconds?: number;
+  expectedAsset?: string | undefined;
+  expectedMemo?: string | undefined;
+  maxAgeSeconds?: number | undefined;
 }
 
 export interface VerificationResult {
