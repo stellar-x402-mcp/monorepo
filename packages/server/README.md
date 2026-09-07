@@ -16,6 +16,7 @@ Model Context Protocol (MCP) server providing autonomous AI agents with typed to
 | `soroban_get_transaction` | `hash`, `network` | Poll and inspect Soroban transaction status, execution results, and metadata XDR |
 | `soroban_get_latest_ledger` | `network` | Get the latest ledger sequence, hash, and protocol version from Soroban RPC |
 | `soroban_get_network` | `network` | Get Soroban network passphrase, protocol version, and friendbot URL |
+| `soroban_assemble_transaction` | `transactionXdr`, `network` | Assemble unsigned Soroban transaction envelope with simulation footprint and fees |
 | `stellar_submit_transaction` | `signedEnvelopeXdr`, `network` | Submit signed transaction envelope XDR to the ledger |
 
 ## Transports

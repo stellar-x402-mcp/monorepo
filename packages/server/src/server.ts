@@ -12,6 +12,8 @@ import {
   handleGetLedgerEntries,
   GetTransactionSchema,
   handleGetTransaction,
+  AssembleTransactionSchema,
+  handleAssembleTransaction,
 } from './tools/contract.js';
 import {
   FindPaymentPathsSchema,
@@ -221,6 +223,18 @@ export function createStellarMcpServer(config?: ServerConfig) {
             },
           },
         },
+        {
+          name: 'soroban_assemble_transaction',
+          description: 'Assemble an unsigned Soroban invocation transaction envelope with simulated footprint, resource fee, and authorization',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              transactionXdr: { type: 'string', description: 'Base64-encoded un-assembled Soroban TransactionEnvelope XDR' },
+              network: { type: 'string', enum: ['testnet', 'pubnet'], default: 'testnet' },
+            },
+            required: ['transactionXdr'],
+          },
+        },
       ],
     };
   });
@@ -303,6 +317,14 @@ export function createStellarMcpServer(config?: ServerConfig) {
     if (name === 'soroban_get_network') {
       const parsed = GetNetworkSchema.parse(args || {});
       const result = await handleGetNetwork(parsed, sorobanRpcUrl);
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
+    }
+
+    if (name === 'soroban_assemble_transaction') {
+      const parsed = AssembleTransactionSchema.parse(args);
+      const result = await handleAssembleTransaction(parsed, sorobanRpcUrl);
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
       };

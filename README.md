@@ -56,6 +56,7 @@ Autonomous client wrapper that consumes MCP tools and handles paywall handshakes
 | `soroban_get_transaction` | `hash`, `network` | Polls and inspects Soroban transaction status, execution results, and metadata XDR |
 | `soroban_get_latest_ledger` | `network` | Gets latest ledger sequence, hash, and protocol version from Soroban RPC |
 | `soroban_get_network` | `network` | Gets Soroban network passphrase, protocol version, and friendbot URL |
+| `soroban_assemble_transaction` | `transactionXdr`, `network` | Assembles unsigned Soroban transaction envelope with simulation footprint and fees |
 | `stellar_find_payment_paths` | `sourceAccount`, `destinationAccount`, `destinationAsset`, `destinationAmount`, `network` | Queries Horizon strict-receive payment paths across DEX orderbooks and liquidity pools |
 | `stellar_swap_tokens` | `sourceAccount`, `sendAsset`, `sendMax`, `destAsset`, `destAmount`, `destinationAccount`, `path`, `signedEnvelopeXdr`, `network` | Builds path payment swap transaction envelope XDR or submits signed swap envelope |
 | `stellar_submit_transaction` | `signedEnvelopeXdr`, `network` | Posts signed transaction envelope XDR directly to the Stellar ledger |

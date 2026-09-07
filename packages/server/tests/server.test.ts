@@ -1,9 +1,11 @@
 import { describe, it, expect, vi } from 'vitest';
+import { Account, Keypair, Networks, Operation, rpc, TransactionBuilder } from '@stellar/stellar-sdk';
 import { handleGetBalance } from '../src/tools/account.js';
 import {
   handleSimulateContract,
   handleGetLedgerEntries,
   handleGetTransaction,
+  handleAssembleTransaction,
 } from '../src/tools/contract.js';
 import {
   handleFindPaymentPaths,
@@ -571,5 +573,61 @@ describe('Stellar MCP Server Tools', () => {
 
     expect(requestedPayload.params.transaction).toBe('AAAA_RAW_ENVELOPE_XDR');
     expect(result.minResourceFee).toBe('2000');
+  });
+
+  it('should assemble transaction envelope with footprint and resource fees', async () => {
+    const mockRpc = 'https://rpc.mock';
+    const sourceKey = Keypair.random().publicKey();
+    const contractId = 'CDHOWHQVJQ3NJ2EGZPDGBR4PZ4HFRY3J7BMMZGNA5LUQRL4ZIZL7X5LV';
+
+    const account = new Account(sourceKey, '100');
+    const op = Operation.invokeContractFunction({
+      contract: contractId,
+      function: 'test_func',
+      args: [],
+    });
+    const tx = new TransactionBuilder(account, { fee: '100', networkPassphrase: Networks.TESTNET })
+      .addOperation(op)
+      .setTimeout(30)
+      .build();
+
+    const unAssembledXdr = tx.toXDR();
+
+    const mockPreparedTx = {
+      toXDR: () => 'AAAA_ASSEMBLED_TRANSACTION_XDR',
+      fee: '2100',
+      source: sourceKey,
+      sequence: '101',
+    };
+
+    const prepareSpy = vi.spyOn(rpc.Server.prototype, 'prepareTransaction').mockResolvedValue(mockPreparedTx as any);
+
+    const result = await handleAssembleTransaction(
+      {
+        transactionXdr: unAssembledXdr,
+        network: 'testnet',
+      },
+      mockRpc
+    );
+
+    expect(result.assembledTransactionXdr).toBe('AAAA_ASSEMBLED_TRANSACTION_XDR');
+    expect(result.fee).toBe('2100');
+    expect(result.source).toBe(sourceKey);
+    expect(result.network).toBe('testnet');
+    prepareSpy.mockRestore();
+  });
+
+  it('should handle errors when transaction envelope assembly fails', async () => {
+    const mockRpc = 'https://rpc.mock';
+
+    const result = await handleAssembleTransaction(
+      {
+        transactionXdr: 'INVALID_BASE64_XDR',
+        network: 'testnet',
+      },
+      mockRpc
+    );
+
+    expect(result.error).toBeDefined();
   });
 });

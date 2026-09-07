@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Address, xdr } from '@stellar/stellar-sdk';
+import { Address, Networks, TransactionBuilder, rpc, xdr } from '@stellar/stellar-sdk';
 
 export const SimulateContractSchema = z.object({
   contractId: z.string().min(56).max(56).optional().describe('Soroban Contract ID (C...)'),
@@ -188,6 +188,35 @@ export async function handleGetTransaction(
       envelopeXdr: result.envelopeXdr,
       resultXdr: result.resultXdr,
       resultMetaXdr: result.resultMetaXdr,
+    };
+  } catch (err: any) {
+    return { error: err.message };
+  }
+}
+
+export const AssembleTransactionSchema = z.object({
+  transactionXdr: z.string().min(1).describe('Base64-encoded un-assembled Soroban TransactionEnvelope XDR'),
+  network: z.enum(['testnet', 'pubnet']).default('testnet').describe('Stellar network'),
+});
+
+export async function handleAssembleTransaction(
+  args: z.infer<typeof AssembleTransactionSchema>,
+  sorobanRpcUrl: string
+) {
+  try {
+    const passphrase =
+      args.network === 'pubnet' ? Networks.PUBLIC : Networks.TESTNET;
+
+    const tx = TransactionBuilder.fromXDR(args.transactionXdr, passphrase);
+    const server = new rpc.Server(sorobanRpcUrl);
+    const preparedTx = await server.prepareTransaction(tx);
+
+    return {
+      assembledTransactionXdr: preparedTx.toXDR(),
+      fee: preparedTx.fee,
+      source: preparedTx.source,
+      sequence: preparedTx.sequence,
+      network: args.network,
     };
   } catch (err: any) {
     return { error: err.message };
