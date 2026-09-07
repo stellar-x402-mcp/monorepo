@@ -32,7 +32,12 @@ import {
   GetNetworkSchema,
   handleGetNetwork,
 } from './tools/network.js';
-import { GetOrderbookSchema, handleGetOrderbook } from './tools/dex.js';
+import {
+  GetOrderbookSchema,
+  handleGetOrderbook,
+  GetLiquidityPoolsSchema,
+  handleGetLiquidityPools,
+} from './tools/dex.js';
 
 export interface ServerConfig {
   horizonUrl?: string;
@@ -273,6 +278,26 @@ export function createStellarMcpServer(config?: ServerConfig) {
             required: ['sellingAsset', 'buyingAsset'],
           },
         },
+        {
+          name: 'stellar_get_liquidity_pools',
+          description: 'Query Stellar AMM liquidity pools, reserve balances, fee tiers, and total shares',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              poolId: { type: 'string', description: 'Specific 64-character hex liquidity pool ID' },
+              reserves: {
+                type: 'array',
+                items: { type: 'string' },
+                description: 'Filter pools by reserve assets ("native" or "CODE:ISSUER")',
+              },
+              account: { type: 'string', description: 'Filter pools where account holds shares (G...)' },
+              cursor: { type: 'string', description: 'Pagination cursor' },
+              limit: { type: 'integer', minimum: 1, maximum: 200, default: 20, description: 'Number of pools to return' },
+              order: { type: 'string', enum: ['asc', 'desc'], default: 'desc' },
+              network: { type: 'string', enum: ['testnet', 'pubnet'], default: 'testnet' },
+            },
+          },
+        },
       ],
     };
   });
@@ -379,6 +404,14 @@ export function createStellarMcpServer(config?: ServerConfig) {
     if (name === 'stellar_get_orderbook') {
       const parsed = GetOrderbookSchema.parse(args);
       const result = await handleGetOrderbook(parsed, horizonUrl);
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
+    }
+
+    if (name === 'stellar_get_liquidity_pools') {
+      const parsed = GetLiquidityPoolsSchema.parse(args || {});
+      const result = await handleGetLiquidityPools(parsed, horizonUrl);
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
       };

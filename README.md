@@ -61,6 +61,7 @@ Autonomous client wrapper that consumes MCP tools and handles paywall handshakes
 | `stellar_find_payment_paths` | `sourceAccount`, `destinationAccount`, `destinationAsset`, `destinationAmount`, `network` | Queries Horizon strict-receive payment paths across DEX orderbooks and liquidity pools |
 | `stellar_swap_tokens` | `sourceAccount`, `sendAsset`, `sendMax`, `destAsset`, `destAmount`, `destinationAccount`, `path`, `signedEnvelopeXdr`, `network` | Builds path payment swap transaction envelope XDR or submits signed swap envelope |
 | `stellar_get_orderbook` | `sellingAsset`, `buyingAsset`, `limit`, `network` | Queries real-time Stellar DEX orderbook depth, bids, asks, and bid-ask spread |
+| `stellar_get_liquidity_pools` | `poolId`, `reserves`, `account`, `cursor`, `limit`, `order`, `network` | Queries Stellar AMM liquidity pools, reserve balances, fee tiers, and total shares |
 | `stellar_submit_transaction` | `signedEnvelopeXdr`, `network` | Posts signed transaction envelope XDR directly to the Stellar ledger |
 
 ---

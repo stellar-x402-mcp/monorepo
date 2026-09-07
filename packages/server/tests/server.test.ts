@@ -15,7 +15,7 @@ import {
 } from '../src/tools/payment.js';
 import { handleQueryEvents } from '../src/tools/events.js';
 import { handleGetLatestLedger, handleGetNetwork } from '../src/tools/network.js';
-import { handleGetOrderbook } from '../src/tools/dex.js';
+import { handleGetOrderbook, handleGetLiquidityPools } from '../src/tools/dex.js';
 
 describe('Stellar MCP Server Tools', () => {
   it('should parse and format account balances from Horizon', async () => {
@@ -824,5 +824,82 @@ describe('Stellar MCP Server Tools', () => {
     );
 
     expect(result.error).toContain('Invalid sellingAsset format');
+  });
+
+  it('should fetch and parse liquidity pools by reserve assets', async () => {
+    const mockHorizon = 'https://horizon.mock';
+    const mockPoolsResponse = {
+      _embedded: {
+        records: [
+          {
+            id: '001041ac1d61419a62e0c0152e59f13aff7f8f65c2f04c1371ebbc662b31f4ab',
+            fee_bp: 30,
+            type: 'constant_product',
+            total_trustlines: '5',
+            total_shares: '353.5533905',
+            reserves: [
+              { asset: 'native', amount: '275.0000000' },
+              { asset: 'USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5', amount: '450.0000000' },
+            ],
+            last_modified_ledger: 105990,
+            last_modified_time: '2026-07-13T23:25:07Z',
+            paging_token: '001041ac...',
+          },
+        ],
+      },
+    };
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => mockPoolsResponse,
+    });
+
+    const result = await handleGetLiquidityPools(
+      {
+        reserves: ['native', 'USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5'],
+        limit: 10,
+        order: 'desc',
+        network: 'testnet',
+      },
+      mockHorizon
+    );
+
+    expect(result.count).toBe(1);
+    expect(result.pools[0].id).toBe('001041ac1d61419a62e0c0152e59f13aff7f8f65c2f04c1371ebbc662b31f4ab');
+    expect(result.pools[0].feeBp).toBe(30);
+    expect(result.pools[0].totalShares).toBe('353.5533905');
+    expect(result.pools[0].reserves).toHaveLength(2);
+  });
+
+  it('should fetch specific liquidity pool by pool ID', async () => {
+    const mockHorizon = 'https://horizon.mock';
+    const mockPool = {
+      id: '001041ac1d61419a62e0c0152e59f13aff7f8f65c2f04c1371ebbc662b31f4ab',
+      fee_bp: 30,
+      type: 'constant_product',
+      total_trustlines: '5',
+      total_shares: '353.5533905',
+      reserves: [
+        { asset: 'native', amount: '275.0000000' },
+      ],
+      last_modified_ledger: 105990,
+      last_modified_time: '2026-07-13T23:25:07Z',
+    };
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => mockPool,
+    });
+
+    const result = await handleGetLiquidityPools(
+      {
+        poolId: '001041ac1d61419a62e0c0152e59f13aff7f8f65c2f04c1371ebbc662b31f4ab',
+        network: 'testnet',
+      },
+      mockHorizon
+    );
+
+    expect(result.id).toBe('001041ac1d61419a62e0c0152e59f13aff7f8f65c2f04c1371ebbc662b31f4ab');
+    expect(result.feeBp).toBe(30);
   });
 });
