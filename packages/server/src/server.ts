@@ -14,6 +14,8 @@ import {
   handleGetTransaction,
   AssembleTransactionSchema,
   handleAssembleTransaction,
+  ReadStorageSchema,
+  handleReadStorage,
 } from './tools/contract.js';
 import {
   FindPaymentPathsSchema,
@@ -235,6 +237,27 @@ export function createStellarMcpServer(config?: ServerConfig) {
             required: ['transactionXdr'],
           },
         },
+        {
+          name: 'soroban_read_storage',
+          description: 'High-level deserializer for Soroban contract storage (SAC token balances, admin keys, user maps) directly into native JSON',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              contractId: { type: 'string', description: 'Soroban C... contract ID' },
+              key: { type: 'string', description: 'Storage key name, user address, or ScVal XDR' },
+              keyType: {
+                type: 'string',
+                enum: ['symbol', 'address', 'sac_balance', 'instance', 'raw_scval_xdr'],
+                default: 'symbol',
+                description: 'Storage key type',
+              },
+              userAddress: { type: 'string', description: 'User address (G...) for SAC token balance lookups' },
+              durability: { type: 'string', enum: ['persistent', 'temporary'], default: 'persistent' },
+              network: { type: 'string', enum: ['testnet', 'pubnet'], default: 'testnet' },
+            },
+            required: ['contractId'],
+          },
+        },
       ],
     };
   });
@@ -325,6 +348,14 @@ export function createStellarMcpServer(config?: ServerConfig) {
     if (name === 'soroban_assemble_transaction') {
       const parsed = AssembleTransactionSchema.parse(args);
       const result = await handleAssembleTransaction(parsed, sorobanRpcUrl);
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
+    }
+
+    if (name === 'soroban_read_storage') {
+      const parsed = ReadStorageSchema.parse(args);
+      const result = await handleReadStorage(parsed, sorobanRpcUrl);
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
       };

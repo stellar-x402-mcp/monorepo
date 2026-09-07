@@ -1,11 +1,12 @@
 import { describe, it, expect, vi } from 'vitest';
-import { Account, Keypair, Networks, Operation, rpc, TransactionBuilder } from '@stellar/stellar-sdk';
+import { Account, Address, Keypair, Networks, Operation, rpc, TransactionBuilder, xdr } from '@stellar/stellar-sdk';
 import { handleGetBalance } from '../src/tools/account.js';
 import {
   handleSimulateContract,
   handleGetLedgerEntries,
   handleGetTransaction,
   handleAssembleTransaction,
+  handleReadStorage,
 } from '../src/tools/contract.js';
 import {
   handleFindPaymentPaths,
@@ -629,5 +630,139 @@ describe('Stellar MCP Server Tools', () => {
     );
 
     expect(result.error).toBeDefined();
+  });
+
+  it('should deserialize contract admin address from storage into native JSON string', async () => {
+    const mockRpc = 'https://rpc.mock';
+    const contractId = 'CDHOWHQVJQ3NJ2EGZPDGBR4PZ4HFRY3J7BMMZGNA5LUQRL4ZIZL7X5LV';
+    const adminKp = Keypair.random();
+    const adminAddress = adminKp.publicKey();
+
+    const contractAddress = new Address(contractId);
+    const scKey = xdr.ScVal.scvSymbol('admin');
+    const scVal = new Address(adminAddress).toScVal();
+
+    const contractData = new xdr.ContractDataEntry({
+      contract: contractAddress.toScAddress(),
+      key: scKey,
+      durability: xdr.ContractDataDurability.persistent(),
+      val: scVal,
+      ext: new xdr.ExtensionPoint(0),
+    });
+
+    const entryData = xdr.LedgerEntryData.contractData(contractData);
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        result: {
+          latestLedger: 105990,
+          entries: [
+            {
+              xdr: entryData.toXDR('base64'),
+              lastModifiedLedgerSeq: 105900,
+              liveUntilLedgerSeq: 108900,
+            },
+          ],
+        },
+      }),
+    });
+
+    const result = await handleReadStorage(
+      {
+        contractId,
+        key: 'admin',
+        keyType: 'symbol',
+        network: 'testnet',
+      },
+      mockRpc
+    );
+
+    expect(result.found).toBe(true);
+    expect(result.decodedValue).toBe(adminAddress);
+    expect(result.lastModifiedLedgerSeq).toBe(105900);
+  });
+
+  it('should deserialize SAC token balance I128 numbers cleanly', async () => {
+    const mockRpc = 'https://rpc.mock';
+    const contractId = 'CDHOWHQVJQ3NJ2EGZPDGBR4PZ4HFRY3J7BMMZGNA5LUQRL4ZIZL7X5LV';
+    const userKp = Keypair.random();
+    const userAddress = userKp.publicKey();
+
+    const contractAddress = new Address(contractId);
+    const scKey = xdr.ScVal.scvVec([
+      xdr.ScVal.scvSymbol('Balance'),
+      new Address(userAddress).toScVal(),
+    ]);
+    const scVal = xdr.ScVal.scvI128(
+      new xdr.Int128Parts({
+        lo: new xdr.Uint64(5000000),
+        hi: new xdr.Int64(0),
+      })
+    );
+
+    const contractData = new xdr.ContractDataEntry({
+      contract: contractAddress.toScAddress(),
+      key: scKey,
+      durability: xdr.ContractDataDurability.persistent(),
+      val: scVal,
+      ext: new xdr.ExtensionPoint(0),
+    });
+
+    const entryData = xdr.LedgerEntryData.contractData(contractData);
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        result: {
+          entries: [
+            {
+              xdr: entryData.toXDR('base64'),
+              lastModifiedLedgerSeq: 105800,
+            },
+          ],
+        },
+      }),
+    });
+
+    const result = await handleReadStorage(
+      {
+        contractId,
+        keyType: 'sac_balance',
+        userAddress,
+        network: 'testnet',
+      },
+      mockRpc
+    );
+
+    expect(result.found).toBe(true);
+    expect(result.decodedValue).toBe('5000000');
+  });
+
+  it('should return found false when storage entry is not present', async () => {
+    const mockRpc = 'https://rpc.mock';
+    const contractId = 'CDHOWHQVJQ3NJ2EGZPDGBR4PZ4HFRY3J7BMMZGNA5LUQRL4ZIZL7X5LV';
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        result: {
+          entries: [],
+        },
+      }),
+    });
+
+    const result = await handleReadStorage(
+      {
+        contractId,
+        key: 'nonexistent',
+        keyType: 'symbol',
+        network: 'testnet',
+      },
+      mockRpc
+    );
+
+    expect(result.found).toBe(false);
+    expect(result.message).toContain('not found');
   });
 });
