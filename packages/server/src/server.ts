@@ -12,6 +12,7 @@ import {
   SubmitTransactionSchema,
   handleSubmitTransaction,
 } from './tools/payment.js';
+import { QueryEventsSchema, handleQueryEvents } from './tools/events.js';
 
 export interface ServerConfig {
   horizonUrl?: string;
@@ -90,6 +91,29 @@ export function createStellarMcpServer(config?: ServerConfig) {
             required: ['signedEnvelopeXdr'],
           },
         },
+        {
+          name: 'soroban_query_events',
+          description: 'Query Soroban contract event logs by contract ID, topic, and ledger range',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              startLedger: { type: 'integer', description: 'Start ledger sequence number' },
+              contractIds: {
+                type: 'array',
+                items: { type: 'string' },
+                description: 'Soroban Contract IDs (C...)',
+              },
+              topics: {
+                type: 'array',
+                items: { type: 'string' },
+                description: 'Event topic filters',
+              },
+              cursor: { type: 'string', description: 'Pagination cursor' },
+              limit: { type: 'integer', description: 'Maximum number of events (up to 1000)' },
+              network: { type: 'string', enum: ['testnet', 'pubnet'], default: 'testnet' },
+            },
+          },
+        },
       ],
     };
   });
@@ -124,6 +148,14 @@ export function createStellarMcpServer(config?: ServerConfig) {
     if (name === 'stellar_submit_transaction') {
       const parsed = SubmitTransactionSchema.parse(args);
       const result = await handleSubmitTransaction(parsed, horizonUrl);
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
+    }
+
+    if (name === 'soroban_query_events') {
+      const parsed = QueryEventsSchema.parse(args || {});
+      const result = await handleQueryEvents(parsed, sorobanRpcUrl);
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
       };

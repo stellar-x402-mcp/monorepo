@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { handleGetBalance } from '../src/tools/account.js';
 import { handleSimulateContract } from '../src/tools/contract.js';
 import { handleFindPaymentPaths, handleSubmitTransaction } from '../src/tools/payment.js';
+import { handleQueryEvents } from '../src/tools/events.js';
 
 describe('Stellar MCP Server Tools', () => {
   it('should parse and format account balances from Horizon', async () => {
@@ -111,5 +112,66 @@ describe('Stellar MCP Server Tools', () => {
 
     expect(result.hash).toBe('3f7b2c...1a9e');
     expect(result.successful).toBe(true);
+  });
+
+  it('should query and parse Soroban contract events from RPC', async () => {
+    const mockRpc = 'https://rpc.mock';
+    const mockEventsResponse = {
+      result: {
+        latestLedger: 105430,
+        cursor: '0000105430-0000000001',
+        events: [
+          {
+            type: 'contract',
+            ledger: 105429,
+            contractId: 'CA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA64P7TVKU2M',
+            id: '0000105429-0000000001',
+            topic: ['AAAABQAAAAdkZXBvc2l0AAAA', 'AAAAAQAAAA=='],
+            value: { xdr: 'AAAAAQAAAAM=' },
+          },
+        ],
+      },
+    };
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => mockEventsResponse,
+    });
+
+    const result = await handleQueryEvents(
+      {
+        contractIds: ['CA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA64P7TVKU2M'],
+        startLedger: 105400,
+        limit: 10,
+        network: 'testnet',
+      },
+      mockRpc
+    );
+
+    expect(result.latestLedger).toBe(105430);
+    expect(result.cursor).toBe('0000105430-0000000001');
+    expect(result.events).toHaveLength(1);
+    expect(result.events[0].contractId).toBe('CA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA64P7TVKU2M');
+  });
+
+  it('should return error structure when Soroban RPC returns an error', async () => {
+    const mockRpc = 'https://rpc.mock';
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        error: { code: -32600, message: 'Invalid startLedger requested' },
+      }),
+    });
+
+    const result = await handleQueryEvents(
+      {
+        startLedger: 999999999,
+        network: 'testnet',
+      },
+      mockRpc
+    );
+
+    expect(result.error).toBe('Invalid startLedger requested');
+    expect(result.code).toBe(-32600);
   });
 });
