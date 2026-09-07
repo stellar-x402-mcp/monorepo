@@ -22,6 +22,7 @@ import {
   handleSwapTokens,
 } from './tools/payment.js';
 import { QueryEventsSchema, handleQueryEvents } from './tools/events.js';
+import { GetLatestLedgerSchema, handleGetLatestLedger } from './tools/network.js';
 
 export interface ServerConfig {
   horizonUrl?: string;
@@ -181,6 +182,16 @@ export function createStellarMcpServer(config?: ServerConfig) {
             required: ['hash'],
           },
         },
+        {
+          name: 'soroban_get_latest_ledger',
+          description: 'Get the latest ledger sequence, hash, and protocol version from Soroban RPC',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              network: { type: 'string', enum: ['testnet', 'pubnet'], default: 'testnet' },
+            },
+          },
+        },
       ],
     };
   });
@@ -247,6 +258,14 @@ export function createStellarMcpServer(config?: ServerConfig) {
     if (name === 'soroban_get_transaction') {
       const parsed = GetTransactionSchema.parse(args);
       const result = await handleGetTransaction(parsed, sorobanRpcUrl);
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
+    }
+
+    if (name === 'soroban_get_latest_ledger') {
+      const parsed = GetLatestLedgerSchema.parse(args || {});
+      const result = await handleGetLatestLedger(parsed, sorobanRpcUrl);
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
       };

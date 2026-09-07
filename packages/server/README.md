@@ -13,6 +13,7 @@ Model Context Protocol (MCP) server providing autonomous AI agents with typed to
 | `soroban_query_events` | `startLedger`, `contractIds`, `topics`, `cursor`, `limit`, `network` | Query Soroban contract event logs by contract ID, topic, and ledger range |
 | `soroban_get_ledger_entries` | `keys`, `contractId`, `keySymbol`, `durability`, `network` | Read contract data and instance storage keys directly from Soroban RPC ledger state |
 | `soroban_get_transaction` | `hash`, `network` | Poll and inspect Soroban transaction status, execution results, and metadata XDR |
+| `soroban_get_latest_ledger` | `network` | Get the latest ledger sequence, hash, and protocol version from Soroban RPC |
 | `stellar_submit_transaction` | `signedEnvelopeXdr`, `network` | Submit signed transaction envelope XDR to the ledger |
 
 ## Transports

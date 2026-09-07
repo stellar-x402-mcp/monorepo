@@ -11,6 +11,7 @@ import {
   handleSwapTokens,
 } from '../src/tools/payment.js';
 import { handleQueryEvents } from '../src/tools/events.js';
+import { handleGetLatestLedger } from '../src/tools/network.js';
 
 describe('Stellar MCP Server Tools', () => {
   it('should parse and format account balances from Horizon', async () => {
@@ -420,5 +421,44 @@ describe('Stellar MCP Server Tools', () => {
 
     expect(result.status).toBe('NOT_FOUND');
     expect(result.latestLedger).toBe(105655);
+  });
+
+  it('should fetch latest ledger sequence and protocol version from Soroban RPC', async () => {
+    const mockRpc = 'https://rpc.mock';
+    const mockLedgerData = {
+      id: '63d7e8b6b28b7e2832810a9a8f2780e1a1796521ecda53bbbfef21e63a563914',
+      protocolVersion: 21,
+      sequence: 125890,
+    };
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ result: mockLedgerData }),
+    });
+
+    const result = await handleGetLatestLedger({ network: 'testnet' }, mockRpc);
+
+    expect(result.id).toBe('63d7e8b6b28b7e2832810a9a8f2780e1a1796521ecda53bbbfef21e63a563914');
+    expect(result.protocolVersion).toBe(21);
+    expect(result.sequence).toBe(125890);
+  });
+
+  it('should return error when Soroban RPC returns an error object for getLatestLedger', async () => {
+    const mockRpc = 'https://rpc.mock';
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        error: {
+          code: -32603,
+          message: 'Internal RPC error',
+        },
+      }),
+    });
+
+    const result = await handleGetLatestLedger({ network: 'testnet' }, mockRpc);
+
+    expect(result.error).toBe('Internal RPC error');
+    expect(result.code).toBe(-32603);
   });
 });
