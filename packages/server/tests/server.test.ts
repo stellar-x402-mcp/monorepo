@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { handleGetBalance } from '../src/tools/account.js';
-import { handleSimulateContract } from '../src/tools/contract.js';
+import { handleSimulateContract, handleGetLedgerEntries } from '../src/tools/contract.js';
 import {
   handleFindPaymentPaths,
   handleSubmitTransaction,
@@ -263,5 +263,97 @@ describe('Stellar MCP Server Tools', () => {
 
     expect(result.hash).toBe('swap_tx_hash_12345');
     expect(result.successful).toBe(true);
+  });
+
+  it('should query Soroban ledger entries with explicit keys', async () => {
+    const mockRpc = 'https://rpc.mock';
+    const mockResponse = {
+      result: {
+        latestLedger: 105600,
+        entries: [
+          {
+            key: 'AAAABgAAAAHO6x4VTDbU6IbLxmDHj88OWONp+FjMmaDq6QivmUZX+wAAABQAAAAB',
+            xdr: 'AAAAAQAAAA==',
+            lastModifiedLedgerSeq: 105550,
+            liveUntilLedgerSeq: 120000,
+          },
+        ],
+      },
+    };
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => mockResponse,
+    });
+
+    const result = await handleGetLedgerEntries(
+      {
+        keys: ['AAAABgAAAAHO6x4VTDbU6IbLxmDHj88OWONp+FjMmaDq6QivmUZX+wAAABQAAAAB'],
+        network: 'testnet',
+      },
+      mockRpc
+    );
+
+    expect(result.latestLedger).toBe(105600);
+    expect(result.entries).toHaveLength(1);
+    expect(result.entries[0].lastModifiedLedgerSeq).toBe(105550);
+  });
+
+  it('should query Soroban ledger entries auto-constructing LedgerKey from contractId', async () => {
+    const mockRpc = 'https://rpc.mock';
+    const contractId = 'CDHOWHQVJQ3NJ2EGZPDGBR4PZ4HFRY3J7BMMZGNA5LUQRL4ZIZL7X5LV';
+    const mockResponse = {
+      result: {
+        latestLedger: 105602,
+        entries: [
+          {
+            key: 'AUTO_GENERATED_KEY_XDR',
+            xdr: 'ENTRY_DATA_XDR',
+            lastModifiedLedgerSeq: 105500,
+          },
+        ],
+      },
+    };
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => mockResponse,
+    });
+
+    const result = await handleGetLedgerEntries(
+      {
+        contractId,
+        keySymbol: 'counter',
+        durability: 'persistent',
+        network: 'testnet',
+      },
+      mockRpc
+    );
+
+    expect(result.latestLedger).toBe(105602);
+    expect(result.entries).toHaveLength(1);
+    expect(result.queriedKeys).toHaveLength(1);
+    expect(typeof result.queriedKeys[0]).toBe('string');
+  });
+
+  it('should return error when Soroban RPC getLedgerEntries fails', async () => {
+    const mockRpc = 'https://rpc.mock';
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        error: { code: -32602, message: 'Invalid keys parameter' },
+      }),
+    });
+
+    const result = await handleGetLedgerEntries(
+      {
+        keys: ['INVALID_KEY'],
+        network: 'testnet',
+      },
+      mockRpc
+    );
+
+    expect(result.error).toBe('Invalid keys parameter');
+    expect(result.code).toBe(-32602);
   });
 });

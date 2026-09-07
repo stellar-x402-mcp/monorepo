@@ -5,7 +5,12 @@ import {
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { GetBalanceSchema, handleGetBalance } from './tools/account.js';
-import { SimulateContractSchema, handleSimulateContract } from './tools/contract.js';
+import {
+  SimulateContractSchema,
+  handleSimulateContract,
+  GetLedgerEntriesSchema,
+  handleGetLedgerEntries,
+} from './tools/contract.js';
 import {
   FindPaymentPathsSchema,
   handleFindPaymentPaths,
@@ -139,6 +144,29 @@ export function createStellarMcpServer(config?: ServerConfig) {
             required: ['sourceAccount', 'sendAsset', 'sendMax', 'destAsset', 'destAmount'],
           },
         },
+        {
+          name: 'soroban_get_ledger_entries',
+          description: 'Read contract data and instance storage keys directly from Soroban RPC ledger state',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              keys: {
+                type: 'array',
+                items: { type: 'string' },
+                description: 'Array of base64-encoded LedgerKey XDR strings',
+              },
+              contractId: { type: 'string', description: 'Soroban Contract ID (C...) to inspect' },
+              keySymbol: { type: 'string', description: 'Storage key symbol name or instance if omitted' },
+              durability: {
+                type: 'string',
+                enum: ['persistent', 'temporary'],
+                default: 'persistent',
+                description: 'Storage durability type',
+              },
+              network: { type: 'string', enum: ['testnet', 'pubnet'], default: 'testnet' },
+            },
+          },
+        },
       ],
     };
   });
@@ -189,6 +217,14 @@ export function createStellarMcpServer(config?: ServerConfig) {
     if (name === 'stellar_swap_tokens') {
       const parsed = SwapTokensSchema.parse(args);
       const result = await handleSwapTokens(parsed, horizonUrl);
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
+    }
+
+    if (name === 'soroban_get_ledger_entries') {
+      const parsed = GetLedgerEntriesSchema.parse(args || {});
+      const result = await handleGetLedgerEntries(parsed, sorobanRpcUrl);
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
       };

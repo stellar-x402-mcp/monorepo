@@ -51,6 +51,7 @@ Autonomous client wrapper that consumes MCP tools and handles paywall handshakes
 | `stellar_get_balance` | `accountAddress`, `network` | Fetches native XLM and SAC token balances from Horizon |
 | `soroban_simulate_contract` | `contractId`, `method`, `args`, `network` | Simulates Soroban smart contract invocations without submitting to ledger |
 | `soroban_query_events` | `startLedger`, `contractIds`, `topics`, `cursor`, `limit`, `network` | Queries Soroban contract event logs by contract ID, topic XDR, and ledger ranges |
+| `soroban_get_ledger_entries` | `keys`, `contractId`, `keySymbol`, `durability`, `network` | Reads contract data and instance storage keys directly from Soroban RPC ledger state |
 | `stellar_find_payment_paths` | `sourceAccount`, `destinationAccount`, `destinationAsset`, `destinationAmount`, `network` | Queries Horizon strict-receive payment paths across DEX orderbooks and liquidity pools |
 | `stellar_swap_tokens` | `sourceAccount`, `sendAsset`, `sendMax`, `destAsset`, `destAmount`, `destinationAccount`, `path`, `signedEnvelopeXdr`, `network` | Builds path payment swap transaction envelope XDR or submits signed swap envelope |
 | `stellar_submit_transaction` | `signedEnvelopeXdr`, `network` | Posts signed transaction envelope XDR directly to the Stellar ledger |
