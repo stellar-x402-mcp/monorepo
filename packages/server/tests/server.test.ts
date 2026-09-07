@@ -500,4 +500,76 @@ describe('Stellar MCP Server Tools', () => {
     expect(result.error).toBe('Invalid Request');
     expect(result.code).toBe(-32600);
   });
+
+  it('should parse CPU instructions, memory bytes, min fee, and auth entries from simulation', async () => {
+    const mockRpc = 'https://rpc.mock';
+    const mockSimResult = {
+      minResourceFee: '15400',
+      cost: {
+        cpuInsns: '845000',
+        memBytes: '131072',
+      },
+      results: [
+        {
+          xdr: 'AAAAEgAAAAAAAAAA',
+          auth: ['AAAA...AUTH_ENTRY...'],
+        },
+      ],
+      transactionData: 'AAAA...FOOTPRINT_DATA...',
+      events: [{ type: 'contract', contractId: 'CA7Q...', topic: [], value: 'AAAA...' }],
+      latestLedger: 105990,
+    };
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ result: mockSimResult }),
+    });
+
+    const result = await handleSimulateContract(
+      {
+        contractId: 'CA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA64P7TVKU2M',
+        method: 'transfer',
+        args: [],
+        network: 'testnet',
+      },
+      mockRpc
+    );
+
+    expect(result.minResourceFee).toBe('15400');
+    expect(result.cpuInstructions).toBe(845000);
+    expect(result.memoryBytes).toBe(131072);
+    expect(result.returnValueXdr).toBe('AAAAEgAAAAAAAAAA');
+    expect(result.auth).toEqual(['AAAA...AUTH_ENTRY...']);
+    expect(result.transactionData).toBe('AAAA...FOOTPRINT_DATA...');
+    expect(result.latestLedger).toBe(105990);
+  });
+
+  it('should simulate raw transaction envelope XDR when provided', async () => {
+    const mockRpc = 'https://rpc.mock';
+    let requestedPayload: any = null;
+
+    global.fetch = vi.fn().mockImplementation(async (_url, opts) => {
+      requestedPayload = JSON.parse(opts.body);
+      return {
+        ok: true,
+        json: async () => ({
+          result: {
+            minResourceFee: '2000',
+            results: [{ xdr: 'AAAA' }],
+          },
+        }),
+      };
+    });
+
+    const result = await handleSimulateContract(
+      {
+        transactionXdr: 'AAAA_RAW_ENVELOPE_XDR',
+        network: 'testnet',
+      },
+      mockRpc
+    );
+
+    expect(requestedPayload.params.transaction).toBe('AAAA_RAW_ENVELOPE_XDR');
+    expect(result.minResourceFee).toBe('2000');
+  });
 });

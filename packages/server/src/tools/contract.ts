@@ -2,11 +2,15 @@ import { z } from 'zod';
 import { Address, xdr } from '@stellar/stellar-sdk';
 
 export const SimulateContractSchema = z.object({
-  contractId: z.string().min(56).max(56).describe('Soroban Contract ID (C...)'),
-  method: z.string().min(1).describe('Contract method name'),
+  contractId: z.string().min(56).max(56).optional().describe('Soroban Contract ID (C...)'),
+  method: z.string().min(1).optional().describe('Contract method name'),
   args: z.array(z.any()).default([]).describe('Method arguments'),
+  transactionXdr: z.string().optional().describe('Base64-encoded TransactionEnvelope XDR to simulate'),
   network: z.enum(['testnet', 'pubnet']).default('testnet'),
-});
+}).refine(
+  (data) => data.transactionXdr || (data.contractId && data.method),
+  { message: 'Either "transactionXdr" or both "contractId" and "method" must be provided' }
+);
 
 export const GetLedgerEntriesSchema = z.object({
   keys: z.array(z.string()).optional().describe('Array of base64-encoded LedgerKey XDR strings'),
@@ -21,14 +25,20 @@ export const GetLedgerEntriesSchema = z.object({
 
 export async function handleSimulateContract(args: z.infer<typeof SimulateContractSchema>, rpcUrl: string) {
   try {
+    const params: Record<string, any> = {};
+    if (args.transactionXdr) {
+      params.transaction = args.transactionXdr;
+    } else {
+      params.contractId = args.contractId;
+      params.method = args.method;
+      params.args = args.args;
+    }
+
     const payload = {
       jsonrpc: '2.0',
       id: 1,
       method: 'simulateTransaction',
-      params: {
-        contractId: args.contractId,
-        method: args.method,
-      },
+      params,
     };
 
     const res = await fetch(rpcUrl, {
@@ -38,9 +48,28 @@ export async function handleSimulateContract(args: z.infer<typeof SimulateContra
     });
 
     const data: any = await res.json();
+    if (data.error) {
+      return {
+        error: data.error.message || 'Soroban RPC simulation error',
+        code: data.error.code,
+      };
+    }
+
+    const result = data.result || data || {};
+    const cost = result.cost || {};
+    const firstResult = result.results?.[0] || {};
+
     return {
       contractId: args.contractId,
       method: args.method,
+      minResourceFee: result.minResourceFee,
+      cpuInstructions: cost.cpuInsns ? Number(cost.cpuInsns) : undefined,
+      memoryBytes: cost.memBytes ? Number(cost.memBytes) : undefined,
+      returnValueXdr: firstResult.xdr,
+      auth: firstResult.auth || [],
+      transactionData: result.transactionData,
+      events: result.events || [],
+      latestLedger: result.latestLedger,
       simulatedResult: data.result || data,
     };
   } catch (err: any) {

@@ -67,16 +67,30 @@ export function createStellarMcpServer(config?: ServerConfig) {
         },
         {
           name: 'soroban_simulate_contract',
-          description: 'Simulate a Soroban smart contract invocation to inspect state and returns without submitting',
+          description: 'Simulate a Soroban smart contract invocation to inspect state, CPU/memory resource footprint, and return values without submitting',
           inputSchema: {
             type: 'object',
             properties: {
               contractId: { type: 'string', description: 'Soroban C... contract ID' },
               method: { type: 'string', description: 'Method name' },
               args: { type: 'array', description: 'Method arguments', default: [] },
+              transactionXdr: { type: 'string', description: 'Base64-encoded TransactionEnvelope XDR to simulate' },
               network: { type: 'string', enum: ['testnet', 'pubnet'], default: 'testnet' },
             },
-            required: ['contractId', 'method'],
+          },
+        },
+        {
+          name: 'soroban_simulate_invocation',
+          description: 'Simulate Soroban transaction envelope or invocation to inspect CPU instructions, memory footprint, and auth entries',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              transactionXdr: { type: 'string', description: 'Base64-encoded TransactionEnvelope XDR to simulate' },
+              contractId: { type: 'string', description: 'Soroban C... contract ID' },
+              method: { type: 'string', description: 'Method name' },
+              args: { type: 'array', description: 'Method arguments', default: [] },
+              network: { type: 'string', enum: ['testnet', 'pubnet'], default: 'testnet' },
+            },
           },
         },
         {
@@ -222,7 +236,7 @@ export function createStellarMcpServer(config?: ServerConfig) {
       };
     }
 
-    if (name === 'soroban_simulate_contract') {
+    if (name === 'soroban_simulate_contract' || name === 'soroban_simulate_invocation') {
       const parsed = SimulateContractSchema.parse(args);
       const result = await handleSimulateContract(parsed, sorobanRpcUrl);
       return {
