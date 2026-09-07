@@ -7,6 +7,7 @@ Decorator, verifier, and middleware framework to monetize custom Model Context P
 - `OnChainTransactionVerifier`: Cryptographic and on-chain payment verification engine validating transaction hashes and signed envelopes against Horizon and Soroban RPC.
 - `ReplayProtector`: In-memory and cache-backed storage preventing duplicate submission of the same transaction hash with TTL expiration and LRU eviction.
 - `PaymentChallengeGenerator`: Standardized generator for SEP-0043 / x402-compliant cryptographic challenges, nonces, and HTTP authentication headers.
+- `DynamicPricingEngine`: Flexible pricing engine supporting fixed rates, token-based meter pricing, tiered usage brackets, and dynamic compute functions.
 
 ## Usage
 
@@ -84,4 +85,22 @@ const challenge = generator.createChallenge({
 
 const headers = generator.toHttpHeaders(challenge);
 // Sets WWW-Authenticate, X-Payment-Challenge, X-Payment-Nonce, and X-Payment-Valid-Until
+```
+
+### Dynamic and Metered Pricing with `DynamicPricingEngine`
+
+```ts
+import { DynamicPricingEngine } from '@stellar-mcp/paywall';
+
+// Per-token metered pricing
+const pricing = new DynamicPricingEngine({
+  model: 'per_token',
+  basePrice: '0.001',
+  pricePerToken: '0.00001',
+  minPrice: '0.001',
+  maxPrice: '0.050',
+});
+
+const price = await pricing.calculatePrice({ tokens: 1500 });
+// Returns exact price formatted to Stellar stroop precision (e.g. "0.0160000")
 ```
