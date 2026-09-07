@@ -1,7 +1,11 @@
 import { describe, it, expect, vi } from 'vitest';
 import { handleGetBalance } from '../src/tools/account.js';
 import { handleSimulateContract } from '../src/tools/contract.js';
-import { handleFindPaymentPaths, handleSubmitTransaction } from '../src/tools/payment.js';
+import {
+  handleFindPaymentPaths,
+  handleSubmitTransaction,
+  handleSwapTokens,
+} from '../src/tools/payment.js';
 import { handleQueryEvents } from '../src/tools/events.js';
 
 describe('Stellar MCP Server Tools', () => {
@@ -173,5 +177,91 @@ describe('Stellar MCP Server Tools', () => {
 
     expect(result.error).toBe('Invalid startLedger requested');
     expect(result.code).toBe(-32600);
+  });
+
+  it('should construct unsigned path payment swap transaction envelope', async () => {
+    const mockHorizon = 'https://horizon.mock';
+    const sourceAccount = 'GBHI7IOIZNTMZ5NKBQGTFSL62QLKVIIAKO54WDJRF2JWTMERZU7JQRGK';
+    const destinationAccount = 'GCALKSGAZRJLSUEJT3M5W6LN4R7XQOLIRCOS6ZA6EDZVTZDBIIPPFKJ6';
+    const usdcIssuer = 'GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5';
+
+    global.fetch = vi.fn().mockImplementation(async (url: string) => {
+      if (url.includes('/paths/strict-receive')) {
+        return {
+          ok: true,
+          json: async () => ({
+            _embedded: {
+              records: [
+                {
+                  source_asset_type: 'native',
+                  source_amount: '12.4500000',
+                  path: [],
+                },
+              ],
+            },
+          }),
+        };
+      }
+      if (url.includes(`/accounts/${sourceAccount}`)) {
+        return {
+          ok: true,
+          json: async () => ({
+            id: sourceAccount,
+            sequence: '10023450',
+          }),
+        };
+      }
+      return { ok: false, statusText: 'Not found' };
+    });
+
+    const result = await handleSwapTokens(
+      {
+        sourceAccount,
+        destinationAccount,
+        sendAsset: 'native',
+        sendMax: '15.00',
+        destAsset: `USDC:${usdcIssuer}`,
+        destAmount: '10.00',
+        network: 'testnet',
+      },
+      mockHorizon
+    );
+
+    expect(result.status).toBe('ready_for_signing');
+    expect(result.unsignedEnvelopeXdr).toBeDefined();
+    expect(typeof result.unsignedEnvelopeXdr).toBe('string');
+    expect(result.sourceAccount).toBe(sourceAccount);
+    expect(result.sendAsset).toBe('native');
+    expect(result.destAmount).toBe('10.00');
+  });
+
+  it('should submit signed swap transaction when signedEnvelopeXdr is provided', async () => {
+    const mockHorizon = 'https://horizon.mock';
+    const mockTxResult = {
+      hash: 'swap_tx_hash_12345',
+      ledger: 104550,
+      successful: true,
+    };
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => mockTxResult,
+    });
+
+    const result = await handleSwapTokens(
+      {
+        sourceAccount: 'GBTYXQONX2Q77E5W273FTHYAY2I3G2Z2BVR7XFF5S5KXZ3S6VR2U3K5M',
+        sendAsset: 'native',
+        sendMax: '15.00',
+        destAsset: 'USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5',
+        destAmount: '10.00',
+        signedEnvelopeXdr: 'AAAA_SIGNED_SWAP_XDR',
+        network: 'testnet',
+      },
+      mockHorizon
+    );
+
+    expect(result.hash).toBe('swap_tx_hash_12345');
+    expect(result.successful).toBe(true);
   });
 });

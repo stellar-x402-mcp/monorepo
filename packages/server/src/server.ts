@@ -11,6 +11,8 @@ import {
   handleFindPaymentPaths,
   SubmitTransactionSchema,
   handleSubmitTransaction,
+  SwapTokensSchema,
+  handleSwapTokens,
 } from './tools/payment.js';
 import { QueryEventsSchema, handleQueryEvents } from './tools/events.js';
 
@@ -114,6 +116,29 @@ export function createStellarMcpServer(config?: ServerConfig) {
             },
           },
         },
+        {
+          name: 'stellar_swap_tokens',
+          description: 'Build optimal DEX path payment swap transaction or execute signed swap envelope',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              sourceAccount: { type: 'string', description: 'Sender Stellar G... public key' },
+              destinationAccount: { type: 'string', description: 'Optional recipient Stellar G... public key' },
+              sendAsset: { type: 'string', description: '"native" or "CODE:ISSUER"' },
+              sendMax: { type: 'string', description: 'Maximum amount of source token willing to spend' },
+              destAsset: { type: 'string', description: '"native" or "CODE:ISSUER"' },
+              destAmount: { type: 'string', description: 'Exact amount of destination token to receive' },
+              path: {
+                type: 'array',
+                items: { type: 'string' },
+                description: 'Optional explicit intermediate asset path',
+              },
+              signedEnvelopeXdr: { type: 'string', description: 'Optional signed envelope XDR for execution' },
+              network: { type: 'string', enum: ['testnet', 'pubnet'], default: 'testnet' },
+            },
+            required: ['sourceAccount', 'sendAsset', 'sendMax', 'destAsset', 'destAmount'],
+          },
+        },
       ],
     };
   });
@@ -156,6 +181,14 @@ export function createStellarMcpServer(config?: ServerConfig) {
     if (name === 'soroban_query_events') {
       const parsed = QueryEventsSchema.parse(args || {});
       const result = await handleQueryEvents(parsed, sorobanRpcUrl);
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
+    }
+
+    if (name === 'stellar_swap_tokens') {
+      const parsed = SwapTokensSchema.parse(args);
+      const result = await handleSwapTokens(parsed, horizonUrl);
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
       };

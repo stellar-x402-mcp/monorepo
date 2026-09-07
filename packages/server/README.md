@@ -9,6 +9,8 @@ Model Context Protocol (MCP) server providing autonomous AI agents with typed to
 | `stellar_get_balance` | `accountAddress`, `network` | Fetch native XLM and SAC token balances for an account |
 | `soroban_simulate_contract` | `contractId`, `method`, `args`, `network` | Simulate contract invocation to inspect state and returns without submitting |
 | `stellar_find_payment_paths` | `sourceAccount`, `destinationAccount`, `destinationAsset`, `destinationAmount`, `network` | Query Horizon for strict-receive DEX payment routes |
+| `stellar_swap_tokens` | `sourceAccount`, `sendAsset`, `sendMax`, `destAsset`, `destAmount`, `destinationAccount`, `path`, `signedEnvelopeXdr`, `network` | Build optimal DEX path payment swap transaction or execute signed envelope |
+| `soroban_query_events` | `startLedger`, `contractIds`, `topics`, `cursor`, `limit`, `network` | Query Soroban contract event logs by contract ID, topic, and ledger range |
 | `stellar_submit_transaction` | `signedEnvelopeXdr`, `network` | Submit signed transaction envelope XDR to the ledger |
 
 ## Transports
