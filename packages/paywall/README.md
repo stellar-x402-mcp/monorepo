@@ -6,6 +6,7 @@ Decorator, verifier, and middleware framework to monetize custom Model Context P
 - `@x402Tool`: Higher-order decorator intercepting unpaid MCP tool calls with structured 402 challenge errors.
 - `OnChainTransactionVerifier`: Cryptographic and on-chain payment verification engine validating transaction hashes and signed envelopes against Horizon and Soroban RPC.
 - `ReplayProtector`: In-memory and cache-backed storage preventing duplicate submission of the same transaction hash with TTL expiration and LRU eviction.
+- `PaymentChallengeGenerator`: Standardized generator for SEP-0043 / x402-compliant cryptographic challenges, nonces, and HTTP authentication headers.
 
 ## Usage
 
@@ -62,4 +63,25 @@ const claimResult = await replayProtector.claim(txHash);
 if (!claimResult.success) {
   throw new Error('Duplicate payment transaction hash detected');
 }
+```
+
+### Generating SEP-0043 / x402 Challenges with `PaymentChallengeGenerator`
+
+```ts
+import { PaymentChallengeGenerator } from '@stellar-mcp/paywall';
+
+const generator = new PaymentChallengeGenerator({
+  network: 'stellar:testnet',
+  defaultRecipient: 'GCALKSGAZRJLSUEJT3M5W6LN4R7XQOLIRCOS6ZA6EDZVTZDBIIPPFKJ6',
+  defaultAsset: 'native',
+  defaultValidForSeconds: 300,
+});
+
+const challenge = generator.createChallenge({
+  price: '0.05',
+  resource: '/api/v1/compute/predict',
+});
+
+const headers = generator.toHttpHeaders(challenge);
+// Sets WWW-Authenticate, X-Payment-Challenge, X-Payment-Nonce, and X-Payment-Valid-Until
 ```
