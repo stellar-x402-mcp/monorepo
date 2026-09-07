@@ -4,7 +4,12 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
-import { GetBalanceSchema, handleGetBalance } from './tools/account.js';
+import {
+  GetBalanceSchema,
+  handleGetBalance,
+  GetAccountDetailsSchema,
+  handleGetAccountDetails,
+} from './tools/account.js';
 import {
   SimulateContractSchema,
   handleSimulateContract,
@@ -70,6 +75,18 @@ export function createStellarMcpServer(config?: ServerConfig) {
         {
           name: 'stellar_get_balance',
           description: 'Fetch native XLM and SAC token balances for a Stellar account',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              accountAddress: { type: 'string', description: 'Stellar G... public key' },
+              network: { type: 'string', enum: ['testnet', 'pubnet'], default: 'testnet' },
+            },
+            required: ['accountAddress'],
+          },
+        },
+        {
+          name: 'stellar_get_account_details',
+          description: 'Inspect detailed Stellar account state including sequence number, thresholds, signer weights, flags, and balances',
           inputSchema: {
             type: 'object',
             properties: {
@@ -330,6 +347,14 @@ export function createStellarMcpServer(config?: ServerConfig) {
     if (name === 'stellar_get_balance') {
       const parsed = GetBalanceSchema.parse(args);
       const result = await handleGetBalance(parsed, horizonUrl);
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
+    }
+
+    if (name === 'stellar_get_account_details') {
+      const parsed = GetAccountDetailsSchema.parse(args);
+      const result = await handleGetAccountDetails(parsed, horizonUrl);
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
       };

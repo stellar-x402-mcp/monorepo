@@ -7,6 +7,7 @@ Model Context Protocol (MCP) server providing autonomous AI agents with typed to
 | Tool | Parameters | Description |
 |---|---|---|
 | `stellar_get_balance` | `accountAddress`, `network` | Fetch native XLM and SAC token balances for an account |
+| `stellar_get_account_details` | `accountAddress`, `network` | Inspect detailed Stellar account state including sequence number, thresholds, signer weights, flags, and balances |
 | `soroban_simulate_contract` | `contractId`, `method`, `args`, `transactionXdr`, `network` | Simulate contract invocation to inspect state, CPU/memory footprint, and return values without submitting |
 | `soroban_simulate_invocation` | `transactionXdr`, `contractId`, `method`, `args`, `network` | Simulate transaction envelope or contract invocation to parse CPU instructions, memory bytes, and min fee |
 | `stellar_find_payment_paths` | `sourceAccount`, `destinationAccount`, `destinationAsset`, `destinationAmount`, `network` | Query Horizon for strict-receive DEX payment routes |

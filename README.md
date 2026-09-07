@@ -49,6 +49,7 @@ Autonomous client wrapper that consumes MCP tools and handles paywall handshakes
 | Tool Name | Parameters | Description |
 |---|---|---|
 | `stellar_get_balance` | `accountAddress`, `network` | Fetches native XLM and SAC token balances from Horizon |
+| `stellar_get_account_details` | `accountAddress`, `network` | Inspects sequence number, signer keys, thresholds, flags, subentry counts, and asset balances |
 | `soroban_simulate_contract` | `contractId`, `method`, `args`, `transactionXdr`, `network` | Simulates Soroban contract invocation to inspect state, CPU/memory footprint, and return values without submitting |
 | `soroban_simulate_invocation` | `transactionXdr`, `contractId`, `method`, `args`, `network` | Simulates transaction envelope or invocation to parse CPU instructions, memory bytes, and min resource fee |
 | `soroban_query_events` | `startLedger`, `contractIds`, `topics`, `cursor`, `limit`, `network` | Queries Soroban contract event logs by contract ID, topic XDR, and ledger ranges |

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { Account, Address, Keypair, Networks, Operation, rpc, TransactionBuilder, xdr } from '@stellar/stellar-sdk';
-import { handleGetBalance } from '../src/tools/account.js';
+import { handleGetBalance, handleGetAccountDetails } from '../src/tools/account.js';
 import {
   handleSimulateContract,
   handleGetLedgerEntries,
@@ -992,5 +992,97 @@ describe('Stellar MCP Server Tools', () => {
     expect(result.id).toBe(balanceId);
     expect(result.unsignedEnvelopeXdr).toBeDefined();
     expect(typeof result.unsignedEnvelopeXdr).toBe('string');
+  });
+
+  it('should fetch and parse full account details including sequence, signers, and thresholds', async () => {
+    const mockHorizon = 'https://horizon.mock';
+    const accountAddress = Keypair.random().publicKey();
+    const signerAddress = Keypair.random().publicKey();
+    const mockAccountData = {
+      sequence: '1092837465',
+      sequence_ledger: 839201,
+      subentry_count: 3,
+      inflation_destination: 'GBTYXQONX2Q77E5W273FTHYAY2I3G2Z2BVR7XFF5S5KXZ3S6VR2U3K5M',
+      home_domain: 'example.org',
+      last_modified_ledger: 839250,
+      last_modified_time: '2026-08-15T12:00:00Z',
+      thresholds: {
+        low_threshold: 1,
+        med_threshold: 2,
+        high_threshold: 2,
+      },
+      flags: {
+        auth_required: false,
+        auth_revocable: false,
+        auth_immutable: false,
+        auth_clawback_enabled: false,
+      },
+      balances: [
+        { asset_type: 'native', balance: '1000.5000000', buying_liabilities: '0.0000000', selling_liabilities: '0.0000000' },
+        { asset_type: 'credit_alphanum4', asset_code: 'USDC', asset_issuer: 'GBTYXQONX2Q77E5W273FTHYAY2I3G2Z2BVR7XFF5S5KXZ3S6VR2U3K5M', balance: '250.0000000', limit: '10000.0000000', buying_liabilities: '0.0000000', selling_liabilities: '0.0000000' },
+      ],
+      signers: [
+        { key: accountAddress, weight: 1, type: 'ed25519_public_key' },
+        { key: signerAddress, weight: 1, type: 'ed25519_public_key' },
+      ],
+      num_sponsoring: 1,
+      num_sponsored: 0,
+    };
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => mockAccountData,
+    });
+
+    const result = await handleGetAccountDetails(
+      { accountAddress, network: 'testnet' },
+      mockHorizon
+    );
+
+    expect(result.account).toBe(accountAddress);
+    expect(result.sequence).toBe('1092837465');
+    expect(result.subentryCount).toBe(3);
+    expect(result.thresholds.med_threshold).toBe(2);
+    expect(result.signers).toHaveLength(2);
+    expect(result.signers[1].key).toBe(signerAddress);
+    expect(result.balances).toHaveLength(2);
+    expect(result.balances[0].asset).toBe('XLM');
+    expect(result.balances[1].asset).toBe('USDC:GBTYXQONX2Q77E5W273FTHYAY2I3G2Z2BVR7XFF5S5KXZ3S6VR2U3K5M');
+  });
+
+  it('should return error when account is not funded / not found (404)', async () => {
+    const mockHorizon = 'https://horizon.mock';
+    const accountAddress = Keypair.random().publicKey();
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 404,
+      statusText: 'Not Found',
+    });
+
+    const result = await handleGetAccountDetails(
+      { accountAddress, network: 'testnet' },
+      mockHorizon
+    );
+
+    expect(result.error).toBe('Account not funded / not found on ledger');
+  });
+
+  it('should return error when Horizon responds with 500 server error', async () => {
+    const mockHorizon = 'https://horizon.mock';
+    const accountAddress = Keypair.random().publicKey();
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 500,
+      statusText: 'Internal Server Error',
+    });
+
+    const result = await handleGetAccountDetails(
+      { accountAddress, network: 'testnet' },
+      mockHorizon
+    );
+
+    expect(result.error).toBe('Horizon error: Internal Server Error');
   });
 });
