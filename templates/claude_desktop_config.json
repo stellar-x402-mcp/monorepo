@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "stellar": {
+      "command": "npx",
+      "args": ["-y", "@stellar-mcp/server", "--network", "testnet"]
+    }
+  }
+}

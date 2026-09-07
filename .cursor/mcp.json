@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "stellar": {
+      "command": "node",
+      "args": ["packages/server/dist/index.js"]
+    }
+  }
+}
