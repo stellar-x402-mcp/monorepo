@@ -10,6 +10,8 @@ import {
   handleSimulateContract,
   GetLedgerEntriesSchema,
   handleGetLedgerEntries,
+  GetTransactionSchema,
+  handleGetTransaction,
 } from './tools/contract.js';
 import {
   FindPaymentPathsSchema,
@@ -167,6 +169,18 @@ export function createStellarMcpServer(config?: ServerConfig) {
             },
           },
         },
+        {
+          name: 'soroban_get_transaction',
+          description: 'Poll and inspect Soroban transaction status, execution results, and metadata XDR',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              hash: { type: 'string', description: 'Hex-encoded transaction hash (64 characters)' },
+              network: { type: 'string', enum: ['testnet', 'pubnet'], default: 'testnet' },
+            },
+            required: ['hash'],
+          },
+        },
       ],
     };
   });
@@ -225,6 +239,14 @@ export function createStellarMcpServer(config?: ServerConfig) {
     if (name === 'soroban_get_ledger_entries') {
       const parsed = GetLedgerEntriesSchema.parse(args || {});
       const result = await handleGetLedgerEntries(parsed, sorobanRpcUrl);
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
+    }
+
+    if (name === 'soroban_get_transaction') {
+      const parsed = GetTransactionSchema.parse(args);
+      const result = await handleGetTransaction(parsed, sorobanRpcUrl);
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
       };

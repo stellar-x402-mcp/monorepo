@@ -1,6 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
 import { handleGetBalance } from '../src/tools/account.js';
-import { handleSimulateContract, handleGetLedgerEntries } from '../src/tools/contract.js';
+import {
+  handleSimulateContract,
+  handleGetLedgerEntries,
+  handleGetTransaction,
+} from '../src/tools/contract.js';
 import {
   handleFindPaymentPaths,
   handleSubmitTransaction,
@@ -355,5 +359,66 @@ describe('Stellar MCP Server Tools', () => {
 
     expect(result.error).toBe('Invalid keys parameter');
     expect(result.code).toBe(-32602);
+  });
+
+  it('should query Soroban transaction status and execution details from RPC', async () => {
+    const mockRpc = 'https://rpc.mock';
+    const txHash = 'a1b2c3d4e5f67890123456789abcdef0123456789abcdef0123456789abcdef0';
+    const mockTxData = {
+      status: 'SUCCESS',
+      latestLedger: 105650,
+      latestLedgerCloseTime: '1725712500',
+      ledger: 105645,
+      createdAt: '1725712480',
+      applicationOrder: 1,
+      feeBump: false,
+      envelopeXdr: 'AAAA_ENVELOPE_XDR',
+      resultXdr: 'AAAA_RESULT_XDR',
+      resultMetaXdr: 'AAAA_META_XDR',
+    };
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ result: mockTxData }),
+    });
+
+    const result = await handleGetTransaction(
+      {
+        hash: txHash,
+        network: 'testnet',
+      },
+      mockRpc
+    );
+
+    expect(result.status).toBe('SUCCESS');
+    expect(result.ledger).toBe(105645);
+    expect(result.envelopeXdr).toBe('AAAA_ENVELOPE_XDR');
+    expect(result.resultXdr).toBe('AAAA_RESULT_XDR');
+  });
+
+  it('should return NOT_FOUND status when transaction is not in retention window', async () => {
+    const mockRpc = 'https://rpc.mock';
+    const txHash = '0000000000000000000000000000000000000000000000000000000000000000';
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        result: {
+          status: 'NOT_FOUND',
+          latestLedger: 105655,
+        },
+      }),
+    });
+
+    const result = await handleGetTransaction(
+      {
+        hash: txHash,
+        network: 'testnet',
+      },
+      mockRpc
+    );
+
+    expect(result.status).toBe('NOT_FOUND');
+    expect(result.latestLedger).toBe(105655);
   });
 });

@@ -111,3 +111,56 @@ export async function handleGetLedgerEntries(
     return { error: err.message };
   }
 }
+
+export const GetTransactionSchema = z.object({
+  hash: z.string().length(64).describe('Hex-encoded transaction hash (64 characters)'),
+  network: z.enum(['testnet', 'pubnet']).default('testnet').describe('Stellar network'),
+});
+
+export async function handleGetTransaction(
+  args: z.infer<typeof GetTransactionSchema>,
+  sorobanRpcUrl: string
+) {
+  try {
+    const payload = {
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'getTransaction',
+      params: {
+        hash: args.hash,
+      },
+    };
+
+    const res = await fetch(sorobanRpcUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    const data: any = await res.json();
+    if (data.error) {
+      return {
+        error: data.error.message || 'Soroban RPC error',
+        code: data.error.code,
+      };
+    }
+
+    const result = data.result || {};
+    return {
+      status: result.status,
+      latestLedger: result.latestLedger,
+      latestLedgerCloseTime: result.latestLedgerCloseTime,
+      oldestLedger: result.oldestLedger,
+      oldestLedgerCloseTime: result.oldestLedgerCloseTime,
+      ledger: result.ledger,
+      createdAt: result.createdAt,
+      applicationOrder: result.applicationOrder,
+      feeBump: result.feeBump,
+      envelopeXdr: result.envelopeXdr,
+      resultXdr: result.resultXdr,
+      resultMetaXdr: result.resultMetaXdr,
+    };
+  } catch (err: any) {
+    return { error: err.message };
+  }
+}
