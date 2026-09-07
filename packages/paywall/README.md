@@ -5,6 +5,7 @@ Decorator, verifier, and middleware framework to monetize custom Model Context P
 ## Features
 - `@x402Tool`: Higher-order decorator intercepting unpaid MCP tool calls with structured 402 challenge errors.
 - `OnChainTransactionVerifier`: Cryptographic and on-chain payment verification engine validating transaction hashes and signed envelopes against Horizon and Soroban RPC.
+- `ReplayProtector`: In-memory and cache-backed storage preventing duplicate submission of the same transaction hash with TTL expiration and LRU eviction.
 
 ## Usage
 
@@ -45,5 +46,20 @@ const result = await verifier.verifyTransactionHash(txHash, {
 
 if (result.verified) {
   console.log('Payment verified on ledger', result.ledger);
+}
+```
+
+### Preventing Payment Replays with `ReplayProtector`
+
+```ts
+import { ReplayProtector } from '@stellar-mcp/paywall';
+
+const replayProtector = new ReplayProtector({
+  defaultTtlSeconds: 86400, // 24 hours
+});
+
+const claimResult = await replayProtector.claim(txHash);
+if (!claimResult.success) {
+  throw new Error('Duplicate payment transaction hash detected');
 }
 ```
