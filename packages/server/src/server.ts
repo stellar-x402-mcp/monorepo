@@ -47,6 +47,10 @@ import {
   GetClaimableBalancesSchema,
   handleGetClaimableBalances,
 } from './tools/claimable.js';
+import {
+  StreamLedgerEventsSchema,
+  handleStreamLedgerEvents,
+} from './tools/stream.js';
 
 export interface ServerConfig {
   horizonUrl?: string;
@@ -337,6 +341,45 @@ export function createStellarMcpServer(config?: ServerConfig) {
             },
           },
         },
+        {
+          name: 'stellar_stream_ledger_events',
+          description: 'Stream or sample live Stellar ledger closures, transactions, payments, or operations via Horizon SSE event stream',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              streamType: {
+                type: 'string',
+                enum: ['ledgers', 'transactions', 'payments', 'operations'],
+                default: 'ledgers',
+                description: 'Type of Horizon event stream to capture',
+              },
+              account: {
+                type: 'string',
+                description: 'Stellar account address (G...) to filter account-specific events',
+              },
+              cursor: {
+                type: 'string',
+                default: 'now',
+                description: 'Horizon paging token or "now" to stream live events',
+              },
+              limit: {
+                type: 'integer',
+                minimum: 1,
+                maximum: 20,
+                default: 5,
+                description: 'Maximum number of live events to capture before returning',
+              },
+              timeoutSeconds: {
+                type: 'integer',
+                minimum: 1,
+                maximum: 30,
+                default: 10,
+                description: 'Maximum seconds to wait for incoming stream events',
+              },
+              network: { type: 'string', enum: ['testnet', 'pubnet'], default: 'testnet' },
+            },
+          },
+        },
       ],
     };
   });
@@ -467,6 +510,14 @@ export function createStellarMcpServer(config?: ServerConfig) {
     if (name === 'stellar_get_claimable_balances') {
       const parsed = GetClaimableBalancesSchema.parse(args || {});
       const result = await handleGetClaimableBalances(parsed, horizonUrl);
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
+    }
+
+    if (name === 'stellar_stream_ledger_events') {
+      const parsed = StreamLedgerEventsSchema.parse(args || {});
+      const result = await handleStreamLedgerEvents(parsed, horizonUrl);
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
       };

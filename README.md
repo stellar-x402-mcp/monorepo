@@ -64,6 +64,7 @@ Autonomous client wrapper that consumes MCP tools and handles paywall handshakes
 | `stellar_get_orderbook` | `sellingAsset`, `buyingAsset`, `limit`, `network` | Queries real-time Stellar DEX orderbook depth, bids, asks, and bid-ask spread |
 | `stellar_get_liquidity_pools` | `poolId`, `reserves`, `account`, `cursor`, `limit`, `order`, `network` | Queries Stellar AMM liquidity pools, reserve balances, fee tiers, and total shares |
 | `stellar_get_claimable_balances` | `claimant`, `sponsor`, `asset`, `balanceId`, `buildClaimEnvelope`, `cursor`, `limit`, `order`, `network` | Queries claimable balances, predicates, claimants, and optionally constructs claim envelopes |
+| `stellar_stream_ledger_events` | `streamType`, `account`, `cursor`, `limit`, `timeoutSeconds`, `network` | Streams or samples live ledger closures, transactions, payments, or operations via Horizon SSE |
 | `stellar_submit_transaction` | `signedEnvelopeXdr`, `network` | Posts signed transaction envelope XDR directly to the Stellar ledger |
 
 ---

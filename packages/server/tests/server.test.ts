@@ -17,6 +17,7 @@ import { handleQueryEvents } from '../src/tools/events.js';
 import { handleGetLatestLedger, handleGetNetwork } from '../src/tools/network.js';
 import { handleGetOrderbook, handleGetLiquidityPools } from '../src/tools/dex.js';
 import { handleGetClaimableBalances } from '../src/tools/claimable.js';
+import { handleStreamLedgerEvents } from '../src/tools/stream.js';
 
 describe('Stellar MCP Server Tools', () => {
   it('should parse and format account balances from Horizon', async () => {
@@ -1084,5 +1085,140 @@ describe('Stellar MCP Server Tools', () => {
     );
 
     expect(result.error).toBe('Horizon error: Internal Server Error');
+  });
+
+  it('should capture and format live ledger stream events from Horizon SSE', async () => {
+    const mockHorizon = 'https://horizon.mock';
+    const mockLedgerData = {
+      sequence: 998822,
+      hash: 'a1b2c3d4e5f6',
+      prev_hash: 'f6e5d4c3b2a1',
+      closed_at: '2026-09-01T14:30:00Z',
+      successful_transaction_count: 7,
+      failed_transaction_count: 1,
+      operation_count: 15,
+      protocol_version: 21,
+      paging_token: '998822',
+    };
+
+    const sseChunk = `retry: 1000\n\nevent: open\ndata: "hello"\n\ndata: ${JSON.stringify(mockLedgerData)}\n\n`;
+
+    let readCalled = false;
+    const mockReader = {
+      read: vi.fn().mockImplementation(async () => {
+        if (!readCalled) {
+          readCalled = true;
+          return { done: false, value: new TextEncoder().encode(sseChunk) };
+        }
+        return { done: true, value: undefined };
+      }),
+    };
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      body: mockReader,
+    });
+
+    const result = await handleStreamLedgerEvents(
+      {
+        streamType: 'ledgers',
+        cursor: 'now',
+        limit: 1,
+        timeoutSeconds: 5,
+        network: 'testnet',
+      },
+      mockHorizon
+    );
+
+    expect(result.streamType).toBe('ledgers');
+    expect(result.eventsCaptured).toBe(1);
+    expect(result.events).toHaveLength(1);
+    expect(result.events[0].sequence).toBe(998822);
+    expect(result.events[0].hash).toBe('a1b2c3d4e5f6');
+    expect(result.events[0].successfulTransactionCount).toBe(7);
+    expect(result.nextCursor).toBe('998822');
+  });
+
+  it('should stream account-filtered payments and parse asset information', async () => {
+    const mockHorizon = 'https://horizon.mock';
+    const accountAddress = Keypair.random().publicKey();
+    const mockPaymentData = {
+      id: '1234567890',
+      type: 'payment',
+      from: Keypair.random().publicKey(),
+      to: accountAddress,
+      amount: '75.0000000',
+      asset_type: 'credit_alphanum4',
+      asset_code: 'USDC',
+      asset_issuer: 'GBTYXQONX2Q77E5W273FTHYAY2I3G2Z2BVR7XFF5S5KXZ3S6VR2U3K5M',
+      transaction_hash: '9f8e7d6c5b4a',
+      created_at: '2026-09-02T10:15:00Z',
+      paging_token: '1234567890',
+    };
+
+    const sseChunk = `data: ${JSON.stringify(mockPaymentData)}\n\n`;
+
+    let readCalled = false;
+    const mockReader = {
+      read: vi.fn().mockImplementation(async () => {
+        if (!readCalled) {
+          readCalled = true;
+          return { done: false, value: new TextEncoder().encode(sseChunk) };
+        }
+        return { done: true, value: undefined };
+      }),
+    };
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      body: mockReader,
+    });
+
+    const result = await handleStreamLedgerEvents(
+      {
+        streamType: 'payments',
+        account: accountAddress,
+        cursor: 'now',
+        limit: 1,
+        timeoutSeconds: 5,
+        network: 'testnet',
+      },
+      mockHorizon
+    );
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining(`/accounts/${accountAddress}/payments`),
+      expect.objectContaining({
+        headers: { Accept: 'text/event-stream' },
+      })
+    );
+
+    expect(result.streamType).toBe('payments');
+    expect(result.eventsCaptured).toBe(1);
+    expect(result.events[0].amount).toBe('75.0000000');
+    expect(result.events[0].asset).toBe('USDC:GBTYXQONX2Q77E5W273FTHYAY2I3G2Z2BVR7XFF5S5KXZ3S6VR2U3K5M');
+  });
+
+  it('should return error when Horizon stream connection fails', async () => {
+    const mockHorizon = 'https://horizon.mock';
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 502,
+      statusText: 'Bad Gateway',
+    });
+
+    const result = await handleStreamLedgerEvents(
+      {
+        streamType: 'ledgers',
+        cursor: 'now',
+        limit: 5,
+        timeoutSeconds: 5,
+        network: 'testnet',
+      },
+      mockHorizon
+    );
+
+    expect(result.error).toBe('Horizon streaming error: 502 Bad Gateway');
   });
 });
