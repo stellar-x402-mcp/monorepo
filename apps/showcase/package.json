@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && mkdir -p apps/showcase && cp -r .next apps/showcase/out && cp -r .next out",
     "start": "next start",
     "typecheck": "tsc --noEmit"
   },
