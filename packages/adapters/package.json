@@ -1,0 +1,50 @@
+{
+  "name": "@stellar-mcp/adapters",
+  "version": "0.1.0",
+  "description": "Agent framework adapters for Vercel AI SDK, LangChain, and LlamaIndex with auto-paying Stellar x402 integration",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./vercel": {
+      "types": "./dist/vercel/index.d.ts",
+      "import": "./dist/vercel/index.mjs",
+      "require": "./dist/vercel/index.js"
+    },
+    "./langchain": {
+      "types": "./dist/langchain/index.d.ts",
+      "import": "./dist/langchain/index.mjs",
+      "require": "./dist/langchain/index.js"
+    },
+    "./llamaindex": {
+      "types": "./dist/llamaindex/index.d.ts",
+      "import": "./dist/llamaindex/index.mjs",
+      "require": "./dist/llamaindex/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "@stellar-mcp/agent-client": "workspace:*",
+    "@stellar-mcp/paywall": "workspace:*",
+    "zod": "^3.23.8"
+  },
+  "peerDependencies": {
+    "@stellar/stellar-sdk": ">=16.2.0 <17.0.0"
+  },
+  "devDependencies": {
+    "@stellar/stellar-sdk": "16.2.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.9.2",
+    "vitest": "^2.1.4"
+  }
+}
