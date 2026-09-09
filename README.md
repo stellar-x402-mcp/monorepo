@@ -4,7 +4,7 @@
 [![Vercel Deployment](https://img.shields.io/badge/Vercel-Showcase_Portal-black?logo=vercel)](https://stellar-x402-mcp.vercel.app)
 [![Stellar Testnet](https://img.shields.io/badge/Stellar-Testnet_Deployed-3e7bfa?logo=stellar)](https://stellar.expert/explorer/testnet/contract/CDAVUNF5DHX2MWF33XDMY7WKVBSQZ3SXZDT2TPSNZPEB3Z4HHPPKTVGY)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/Vitest-124_Passing-success.svg)](packages/)
+[![Tests](https://img.shields.io/badge/Vitest-130_Passing-success.svg)](packages/)
 [![Documentation](https://img.shields.io/badge/Docs-Mintlify-18e394?logo=mintlify)](https://github.com/stellar-x402-mcp/docs)
 
 Model Context Protocol (MCP) server, institutional developer tooling system, and multi-payment settlement framework for Stellar and Soroban.
@@ -253,6 +253,7 @@ Production-ready reference implementations illustrating monetization and consump
 
 1. **`apps/showcase`**: Interactive Next.js 16 developer playground deployed to Vercel with live Horizon/Soroban tool execution, 402 challenge simulator, and 250 error code directory.
 2. **`apps/paywalled-oracle`**: Standalone reference MCP server monetizing real-time DEX price discovery, Soroban TVL, and optimal swap routing, protected by `@stellar-mcp/paywall` with USDC micropayments.
+3. **`apps/trading-agent`**: Autonomous AI trading agent consuming paywalled oracle feeds, auto-settling 402 challenges via `@stellar-mcp/agent-client`, enforcing daily budget caps, and executing DEX swaps.
 
 ---
 
@@ -271,7 +272,7 @@ Designed to accommodate 100+ community issues, contributors, and tooling extensi
 # Install dependencies across all workspaces
 pnpm install
 
-# Run 124 tests across all packages and reference apps
+# Run 130 tests across all packages and reference apps
 pnpm test
 
 # Typecheck with strict TypeScript and exactOptionalPropertyTypes
