@@ -4,7 +4,7 @@
 [![Vercel Deployment](https://img.shields.io/badge/Vercel-Showcase_Portal-black?logo=vercel)](https://stellar-x402-mcp.vercel.app)
 [![Stellar Testnet](https://img.shields.io/badge/Stellar-Testnet_Deployed-3e7bfa?logo=stellar)](https://stellar.expert/explorer/testnet/contract/CDAVUNF5DHX2MWF33XDMY7WKVBSQZ3SXZDT2TPSNZPEB3Z4HHPPKTVGY)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/Vitest-98_Passing-success.svg)](packages/)
+[![Tests](https://img.shields.io/badge/Vitest-113_Passing-success.svg)](packages/)
 
 Model Context Protocol (MCP) server, institutional developer tooling system, and multi-payment settlement framework for Stellar and Soroban.
 
@@ -167,6 +167,84 @@ Modeled after `Stellar-IndigoPay` (Issue #1098, PR #1211):
 
 ---
 
+## Agent Framework Adapters (`@stellar-mcp/adapters`)
+
+Native adapters connecting Stellar MCP tools directly into leading autonomous agent frameworks with automatic x402 payment resolution:
+
+### Vercel AI SDK Core (`ai`)
+
+```typescript
+import { generateText } from 'ai';
+import { openai } from '@ai-sdk/openai';
+import { createVercelAITools } from '@stellar-mcp/adapters/vercel';
+import { X402AgentMcpClient } from '@stellar-mcp/agent-client';
+
+const client = new X402AgentMcpClient({ secretKey: process.env.STELLAR_SECRET_KEY });
+const tools = createVercelAITools(mcpTools, client);
+
+const { text } = await generateText({
+  model: openai('gpt-4o'),
+  tools,
+  prompt: 'Check balance for account GABCD and simulate contract CXYZ',
+});
+```
+
+### LangChain.js (`@langchain/core`)
+
+```typescript
+import { createLangChainTools } from '@stellar-mcp/adapters/langchain';
+import { initializeAgentExecutorWithOptions } from 'langchain/agents';
+
+const langchainTools = createLangChainTools(mcpTools, client);
+const executor = await initializeAgentExecutorWithOptions(langchainTools, llm, {
+  agentType: 'structured-chat-zero-shot-react-description',
+});
+```
+
+### LlamaIndex.TS (`llamaindex`)
+
+```typescript
+import { createLlamaIndexTools } from '@stellar-mcp/adapters/llamaindex';
+import { ReActAgent } from 'llamaindex';
+
+const llamaTools = createLlamaIndexTools(mcpTools, client);
+const agent = new ReActAgent({ tools: llamaTools });
+```
+
+---
+
+## Standalone CLI & Config Templates (`@stellar-mcp/cli`)
+
+The `stellar-mcp` CLI provides commands for running servers, inspecting state, managing keys, and profiling gas:
+
+```bash
+# Run MCP server over stdio or SSE
+stellar-mcp serve --transport stdio --network testnet
+stellar-mcp serve --transport sse --port 3000 --network testnet
+
+# Inspect Stellar account or Soroban contract
+stellar-mcp inspect GDCU3C3O7J2D4XJBE7FHD25VDLCPWZVDHCSH5XVLF7ZUZLFEE6KRS6RX
+stellar-mcp inspect CDAVUNF5DHX2MWF33XDMY7WKVBSQZ3SXZDT2TPSNZPEB3Z4HHPPKTVGY
+
+# Generate fresh Ed25519 keypair and fund via Friendbot
+stellar-mcp wallet generate
+stellar-mcp wallet fund GDCU3C3O7J2D4XJBE7FHD25VDLCPWZVDHCSH5XVLF7ZUZLFEE6KRS6RX
+
+# Simulate x402 payment challenge, authorization, and receipt settlement
+stellar-mcp simulate --tool soroban_execute_settlement --price 0.05 --asset USDC
+
+# Display gas, CPU instruction, and fee benchmarks
+stellar-mcp benchmark
+```
+
+### IDE Configuration Templates
+
+- **Claude Desktop**: Copy `templates/claude_desktop_config.json` to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows).
+- **Cursor**: Copy `.cursor/mcp.json` into your workspace root.
+- **Docker**: Run `docker compose up --build` to deploy the SSE server at port 3000.
+
+---
+
 ## Open Source Tooling Governance
 
 Designed to accommodate 100+ community issues, contributors, and tooling extensions:
@@ -182,7 +260,7 @@ Designed to accommodate 100+ community issues, contributors, and tooling extensi
 # Install dependencies across all workspaces
 pnpm install
 
-# Run 98 tests across server, paywall, and client packages
+# Run 113 tests across all packages
 pnpm test
 
 # Typecheck with strict TypeScript and exactOptionalPropertyTypes
