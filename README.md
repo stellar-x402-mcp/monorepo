@@ -5,6 +5,7 @@
 [![Stellar Testnet](https://img.shields.io/badge/Stellar-Testnet_Deployed-3e7bfa?logo=stellar)](https://stellar.expert/explorer/testnet/contract/CDAVUNF5DHX2MWF33XDMY7WKVBSQZ3SXZDT2TPSNZPEB3Z4HHPPKTVGY)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/Vitest-113_Passing-success.svg)](packages/)
+[![Documentation](https://img.shields.io/badge/Docs-Mintlify-18e394?logo=mintlify)](https://github.com/stellar-x402-mcp/docs)
 
 Model Context Protocol (MCP) server, institutional developer tooling system, and multi-payment settlement framework for Stellar and Soroban.
 
@@ -19,10 +20,11 @@ For evaluators, reviewers, and grant administrators:
 | Resource | Target Link | Description |
 |---|---|---|
 | **GitHub Repository** | [github.com/stellar-x402-mcp/monorepo](https://github.com/stellar-x402-mcp/monorepo) | Monorepo source code, contracts, and CI/CD |
+| **Official Documentation (Mintlify)** | [github.com/stellar-x402-mcp/docs](https://github.com/stellar-x402-mcp/docs) | Complete Mintlify documentation and integration guides |
 | **Interactive Showcase (Vercel)** | [stellar-x402-mcp.vercel.app](https://stellar-x402-mcp.vercel.app) | Live tool runner, x402 simulator, and error registry |
 | **Testnet Contract (Stellar.expert)** | [stellar.expert/testnet/contract/...](https://stellar.expert/explorer/testnet/contract/CDAVUNF5DHX2MWF33XDMY7WKVBSQZ3SXZDT2TPSNZPEB3Z4HHPPKTVGY) | Verified state channel contract and upload transactions |
 | **Stellar Laboratory (Testnet)** | [lab.stellar.org/testnet/contract/...](https://lab.stellar.org/r/testnet/contract/CDAVUNF5DHX2MWF33XDMY7WKVBSQZ3SXZDT2TPSNZPEB3Z4HHPPKTVGY) | Live Soroban RPC contract inspection harness |
-| **Planning & Architecture Records** | [github.com/EmeditWeb/stellar-agentic-planning](https://github.com/EmeditWeb/stellar-agentic-planning) | ADR-001 through ADR-010 and 11-milestone roadmap |
+| **Planning & Architecture Records** | [github.com/EmeditWeb/stellar-agentic-planning](https://github.com/EmeditWeb/stellar-agentic-planning) | ADR-001 through ADR-012 and complete roadmap |
 | **Gas Benchmarks** | [contracts/x402_channel/BENCHMARKS.md](contracts/x402_channel/BENCHMARKS.md) | Profiled CPU instructions, memory bytes, and savings |
 | **250 Error Codes Registry** | [packages/paywall/src/errors/](packages/paywall/src/errors/) | Exhaustive machine-readable error classification |
 
