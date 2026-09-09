@@ -8,3 +8,6 @@ target/
 test_snapshots/
 .vercel/
 .next/
+out/
+*.tsbuildinfo
+next-env.d.ts
