@@ -2,9 +2,6 @@
   "name": "@stellar-mcp/server",
   "version": "0.1.0",
   "description": "Model Context Protocol (MCP) server for Stellar Horizon and Soroban RPC",
-  "bin": {
-    "stellar-mcp-server": "./dist/index.js"
-  },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",

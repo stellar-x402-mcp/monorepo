@@ -5,9 +5,6 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
-  "bin": {
-    "stellar-oracle-server": "./dist/index.js"
-  },
   "scripts": {
     "build": "tsup",
     "start": "node dist/index.js",
