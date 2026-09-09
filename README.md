@@ -5,7 +5,7 @@
 [![Stellar Testnet](https://img.shields.io/badge/Stellar-Testnet_Deployed-3e7bfa?logo=stellar)](https://stellar.expert/explorer/testnet/contract/CDAVUNF5DHX2MWF33XDMY7WKVBSQZ3SXZDT2TPSNZPEB3Z4HHPPKTVGY)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/Vitest-130_Passing-success.svg)](packages/)
-[![Documentation](https://img.shields.io/badge/Docs-Mintlify-18e394?logo=mintlify)](https://stellar-x402-mcp.mintlify.site)
+[![Documentation](https://img.shields.io/badge/Documentation-Vercel_Portal-3e7bfa?logo=vercel)](https://stellar-x402-mcp.vercel.app/docs)
 
 Model Context Protocol (MCP) server, institutional developer tooling system, and multi-payment settlement framework for Stellar and Soroban.
 
@@ -20,7 +20,7 @@ For evaluators, reviewers, and grant administrators:
 | Resource | Target Link | Description |
 |---|---|---|
 | **GitHub Repository** | [github.com/stellar-x402-mcp/monorepo](https://github.com/stellar-x402-mcp/monorepo) | Monorepo source code, contracts, and CI/CD |
-| **Official Documentation (Mintlify)** | [stellar-x402-mcp.mintlify.site](https://stellar-x402-mcp.mintlify.site) | Complete Mintlify documentation and integration guides |
+| **Official Documentation** | [stellar-x402-mcp.vercel.app/docs](https://stellar-x402-mcp.vercel.app/docs) | Complete interactive documentation portal, 7 payment modality guides, and error registry |
 | **Interactive Showcase (Vercel)** | [stellar-x402-mcp.vercel.app](https://stellar-x402-mcp.vercel.app) | Live tool runner, x402 simulator, and error registry |
 | **Testnet Contract (Stellar.expert)** | [stellar.expert/testnet/contract/...](https://stellar.expert/explorer/testnet/contract/CDAVUNF5DHX2MWF33XDMY7WKVBSQZ3SXZDT2TPSNZPEB3Z4HHPPKTVGY) | Verified state channel contract and upload transactions |
 | **Stellar Laboratory (Testnet)** | [lab.stellar.org/testnet/contract/...](https://lab.stellar.org/r/testnet/contract/CDAVUNF5DHX2MWF33XDMY7WKVBSQZ3SXZDT2TPSNZPEB3Z4HHPPKTVGY) | Live Soroban RPC contract inspection harness |
