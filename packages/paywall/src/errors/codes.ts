@@ -1,0 +1,2254 @@
+import type { StandardErrorCode } from "./types.js";
+
+export const STANDARD_ERROR_CODES: readonly StandardErrorCode[] = [
+  {
+    "code": 1000,
+    "slug": "ERR_PROTOCOL_INVALID_JSONRPC",
+    "category": "PROTOCOL",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "JSON-RPC payload failed specification compliance",
+    "remedy": "Verify jsonrpc is 2.0 and method, id, and params comply with MCP standard"
+  },
+  {
+    "code": 1001,
+    "slug": "ERR_PROTOCOL_METHOD_NOT_FOUND",
+    "category": "PROTOCOL",
+    "httpStatus": 404,
+    "retryable": false,
+    "message": "Requested MCP tool or method is not registered",
+    "remedy": "Query tools/list to inspect all available tools on this server"
+  },
+  {
+    "code": 1002,
+    "slug": "ERR_PROTOCOL_INVALID_PARAMS",
+    "category": "PROTOCOL",
+    "httpStatus": 422,
+    "retryable": false,
+    "message": "Tool parameters failed Zod schema validation",
+    "remedy": "Check required argument names, types, and constraints against tool schema"
+  },
+  {
+    "code": 1003,
+    "slug": "ERR_PROTOCOL_INTERNAL_ERROR",
+    "category": "PROTOCOL",
+    "httpStatus": 500,
+    "retryable": true,
+    "message": "Internal unhandled error during tool dispatch",
+    "remedy": "Retry with exponential backoff; check server logs if error persists"
+  },
+  {
+    "code": 1004,
+    "slug": "ERR_PROTOCOL_PARSE_ERROR",
+    "category": "PROTOCOL",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Failed to parse incoming request body as valid JSON",
+    "remedy": "Ensure request payload is well-formed UTF-8 encoded JSON"
+  },
+  {
+    "code": 1005,
+    "slug": "ERR_PROTOCOL_TRANSPORT_CLOSED",
+    "category": "PROTOCOL",
+    "httpStatus": 503,
+    "retryable": true,
+    "message": "Stdio or SSE transport stream closed prematurely",
+    "remedy": "Re-establish client transport connection and reissue request"
+  },
+  {
+    "code": 1006,
+    "slug": "ERR_PROTOCOL_SSE_CONNECTION_LOST",
+    "category": "PROTOCOL",
+    "httpStatus": 503,
+    "retryable": true,
+    "message": "Server-Sent Events HTTP connection disconnected",
+    "remedy": "Reconnect to SSE endpoint and resume event stream with last event id"
+  },
+  {
+    "code": 1007,
+    "slug": "ERR_PROTOCOL_SSE_HANDSHAKE_FAILED",
+    "category": "PROTOCOL",
+    "httpStatus": 502,
+    "retryable": true,
+    "message": "Failed initial SSE handshake or header negotiation",
+    "remedy": "Ensure client sends Accept: text/event-stream header"
+  },
+  {
+    "code": 1008,
+    "slug": "ERR_PROTOCOL_REQUEST_TIMEOUT",
+    "category": "PROTOCOL",
+    "httpStatus": 408,
+    "retryable": true,
+    "message": "MCP request timed out awaiting response",
+    "remedy": "Increase client request timeout or check server responsiveness"
+  },
+  {
+    "code": 1009,
+    "slug": "ERR_PROTOCOL_RATE_LIMIT_EXCEEDED",
+    "category": "PROTOCOL",
+    "httpStatus": 429,
+    "retryable": true,
+    "message": "Client exceeded allowed request rate limit",
+    "remedy": "Honor Retry-After header and back off before sending subsequent requests"
+  },
+  {
+    "code": 1010,
+    "slug": "ERR_PROTOCOL_PAYLOAD_TOO_LARGE",
+    "category": "PROTOCOL",
+    "httpStatus": 413,
+    "retryable": false,
+    "message": "Request payload exceeded maximum allowed bytes",
+    "remedy": "Reduce argument size or paginate request into smaller chunks"
+  },
+  {
+    "code": 1011,
+    "slug": "ERR_PROTOCOL_ENCODING_UNSUPPORTED",
+    "category": "PROTOCOL",
+    "httpStatus": 415,
+    "retryable": false,
+    "message": "Content-Encoding header unsupported by server",
+    "remedy": "Send requests with identity or gzip encoding"
+  },
+  {
+    "code": 1012,
+    "slug": "ERR_PROTOCOL_CONTENT_TYPE_INVALID",
+    "category": "PROTOCOL",
+    "httpStatus": 415,
+    "retryable": false,
+    "message": "Expected application/json or text/event-stream",
+    "remedy": "Set Content-Type header to application/json"
+  },
+  {
+    "code": 1013,
+    "slug": "ERR_PROTOCOL_MALFORMED_HEADER",
+    "category": "PROTOCOL",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Required HTTP header malformed or unparseable",
+    "remedy": "Inspect authorization and custom headers for formatting errors"
+  },
+  {
+    "code": 1014,
+    "slug": "ERR_PROTOCOL_SESSION_NOT_FOUND",
+    "category": "PROTOCOL",
+    "httpStatus": 404,
+    "retryable": false,
+    "message": "Active session ID not found in connection registry",
+    "remedy": "Initialize a new MCP session and use returned session identifier"
+  },
+  {
+    "code": 1015,
+    "slug": "ERR_PROTOCOL_SESSION_EXPIRED",
+    "category": "PROTOCOL",
+    "httpStatus": 401,
+    "retryable": false,
+    "message": "Client session has expired due to inactivity",
+    "remedy": "Re-authenticate and establish fresh session context"
+  },
+  {
+    "code": 1016,
+    "slug": "ERR_PROTOCOL_SUBSCRIPTION_FAILED",
+    "category": "PROTOCOL",
+    "httpStatus": 500,
+    "retryable": true,
+    "message": "Failed to subscribe to requested event channel",
+    "remedy": "Verify channel name and reissue subscribe request"
+  },
+  {
+    "code": 1017,
+    "slug": "ERR_PROTOCOL_SUBSCRIPTION_DROPPED",
+    "category": "PROTOCOL",
+    "httpStatus": 503,
+    "retryable": true,
+    "message": "Active event subscription stream was dropped",
+    "remedy": "Resubscribe to event topic with last processed sequence"
+  },
+  {
+    "code": 1018,
+    "slug": "ERR_PROTOCOL_UNAUTHORIZED_CLIENT",
+    "category": "PROTOCOL",
+    "httpStatus": 401,
+    "retryable": false,
+    "message": "Client lacks authentication credentials for MCP endpoint",
+    "remedy": "Provide valid API key or bearer token in Authorization header"
+  },
+  {
+    "code": 1019,
+    "slug": "ERR_PROTOCOL_FORBIDDEN_TOOL",
+    "category": "PROTOCOL",
+    "httpStatus": 403,
+    "retryable": false,
+    "message": "Calling agent lacks permission to invoke this tool",
+    "remedy": "Upgrade client authorization scope or contact server administrator"
+  },
+  {
+    "code": 1020,
+    "slug": "ERR_PROTOCOL_CANCELLED_BY_CLIENT",
+    "category": "PROTOCOL",
+    "httpStatus": 499,
+    "retryable": false,
+    "message": "Invocation cancelled by calling client",
+    "remedy": "No action required if intentional, or re-dispatch if accidental"
+  },
+  {
+    "code": 1021,
+    "slug": "ERR_PROTOCOL_DUPLICATE_REQUEST_ID",
+    "category": "PROTOCOL",
+    "httpStatus": 409,
+    "retryable": false,
+    "message": "JSON-RPC request ID already currently executing",
+    "remedy": "Use unique UUID or incrementing sequence for every request id"
+  },
+  {
+    "code": 1022,
+    "slug": "ERR_PROTOCOL_SCHEMA_MISMATCH",
+    "category": "PROTOCOL",
+    "httpStatus": 500,
+    "retryable": false,
+    "message": "Output failed schema validation before return",
+    "remedy": "Report schema mismatch to server maintainer"
+  },
+  {
+    "code": 1023,
+    "slug": "ERR_PROTOCOL_BUFFER_OVERFLOW",
+    "category": "PROTOCOL",
+    "httpStatus": 500,
+    "retryable": true,
+    "message": "Transport buffer exceeded capacity",
+    "remedy": "Increase client buffer limit or throttle message volume"
+  },
+  {
+    "code": 1024,
+    "slug": "ERR_PROTOCOL_HEARTBEAT_MISSED",
+    "category": "PROTOCOL",
+    "httpStatus": 504,
+    "retryable": true,
+    "message": "Client or server missed keep-alive ping interval",
+    "remedy": "Check network latency and ensure heartbeat ping/pong is configured"
+  },
+  {
+    "code": 1025,
+    "slug": "ERR_PROTOCOL_SERVICE_UNAVAILABLE",
+    "category": "PROTOCOL",
+    "httpStatus": 503,
+    "retryable": true,
+    "message": "MCP server undergoing maintenance or overload",
+    "remedy": "Retry after a delay or switch to fallback server instance"
+  },
+  {
+    "code": 1026,
+    "slug": "ERR_PROTOCOL_BAD_GATEWAY",
+    "category": "PROTOCOL",
+    "httpStatus": 502,
+    "retryable": true,
+    "message": "Upstream MCP gateway failed to respond",
+    "remedy": "Verify gateway configuration and reverse proxy reachability"
+  },
+  {
+    "code": 1027,
+    "slug": "ERR_PROTOCOL_GATEWAY_TIMEOUT",
+    "category": "PROTOCOL",
+    "httpStatus": 504,
+    "retryable": true,
+    "message": "Upstream MCP gateway timed out",
+    "remedy": "Increase gateway timeout settings on proxy"
+  },
+  {
+    "code": 1028,
+    "slug": "ERR_PROTOCOL_UNSUPPORTED_VERSION",
+    "category": "PROTOCOL",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Client requested unsupported MCP protocol version",
+    "remedy": "Upgrade client SDK to match server supported MCP protocol specification"
+  },
+  {
+    "code": 1029,
+    "slug": "ERR_PROTOCOL_COMPRESSION_FAILED",
+    "category": "PROTOCOL",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Failed to decompress incoming message payload",
+    "remedy": "Verify compression algorithm header matches payload encoding"
+  },
+  {
+    "code": 1030,
+    "slug": "ERR_PROTOCOL_STREAM_ABORTED",
+    "category": "PROTOCOL",
+    "httpStatus": 500,
+    "retryable": true,
+    "message": "Active output stream aborted unexpectedly",
+    "remedy": "Reconnect and restart query from previous checkpoint"
+  },
+  {
+    "code": 1031,
+    "slug": "ERR_PROTOCOL_INVALID_ENDPOINT",
+    "category": "PROTOCOL",
+    "httpStatus": 404,
+    "retryable": false,
+    "message": "Requested path does not map to valid MCP endpoint",
+    "remedy": "Use standard /sse or /messages MCP endpoint paths"
+  },
+  {
+    "code": 1032,
+    "slug": "ERR_PROTOCOL_TLS_ERROR",
+    "category": "PROTOCOL",
+    "httpStatus": 525,
+    "retryable": true,
+    "message": "Transport layer security negotiation error",
+    "remedy": "Verify SSL/TLS certificate validity and cipher suite compatibility"
+  },
+  {
+    "code": 1033,
+    "slug": "ERR_PROTOCOL_CORS_FORBIDDEN",
+    "category": "PROTOCOL",
+    "httpStatus": 403,
+    "retryable": false,
+    "message": "Request origin disallowed by CORS policy",
+    "remedy": "Add calling origin to server CORS allowed origins configuration"
+  },
+  {
+    "code": 1034,
+    "slug": "ERR_PROTOCOL_MISSING_TOOL_ARG",
+    "category": "PROTOCOL",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Required positional or named argument absent",
+    "remedy": "Provide all required parameters defined in tool inputSchema"
+  },
+  {
+    "code": 1035,
+    "slug": "ERR_PROTOCOL_ARG_TYPE_MISMATCH",
+    "category": "PROTOCOL",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Tool argument type does not match schema type",
+    "remedy": "Cast argument to expected type e.g. string, number, or boolean"
+  },
+  {
+    "code": 1036,
+    "slug": "ERR_PROTOCOL_UNEXPECTED_EOF",
+    "category": "PROTOCOL",
+    "httpStatus": 400,
+    "retryable": true,
+    "message": "Stream ended before expected delimiter or byte length",
+    "remedy": "Resend full message body without truncation"
+  },
+  {
+    "code": 1037,
+    "slug": "ERR_PROTOCOL_MAX_CONCURRENCY",
+    "category": "PROTOCOL",
+    "httpStatus": 429,
+    "retryable": true,
+    "message": "Server reached maximum concurrent tool executions",
+    "remedy": "Queue requests client-side to stay within server concurrency limits"
+  },
+  {
+    "code": 1038,
+    "slug": "ERR_PROTOCOL_SERVER_SHUTTING_DOWN",
+    "category": "PROTOCOL",
+    "httpStatus": 503,
+    "retryable": true,
+    "message": "Server is in graceful shutdown state",
+    "remedy": "Redirect requests to alternative server node in cluster"
+  },
+  {
+    "code": 1039,
+    "slug": "ERR_PROTOCOL_UNKNOWN_FAULT",
+    "category": "PROTOCOL",
+    "httpStatus": 500,
+    "retryable": true,
+    "message": "Unclassified protocol-level anomaly",
+    "remedy": "Inspect server diagnostics for error trace"
+  },
+  {
+    "code": 1040,
+    "slug": "ERR_HORIZON_ACCOUNT_NOT_FOUND",
+    "category": "HORIZON",
+    "httpStatus": 404,
+    "retryable": false,
+    "message": "Account does not exist on Stellar ledger",
+    "remedy": "Fund account with minimum 1 XLM base reserve before transacting"
+  },
+  {
+    "code": 1041,
+    "slug": "ERR_HORIZON_INSUFFICIENT_BALANCE",
+    "category": "HORIZON",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Account has insufficient available XLM balance",
+    "remedy": "Deposit XLM to cover payment amount and transaction fees"
+  },
+  {
+    "code": 1042,
+    "slug": "ERR_HORIZON_INSUFFICIENT_RESERVE",
+    "category": "HORIZON",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Account lacks balance to meet minimum base reserve",
+    "remedy": "Maintain at least (2 + subentries) * 0.5 XLM reserve in account"
+  },
+  {
+    "code": 1043,
+    "slug": "ERR_HORIZON_SEQUENCE_MISMATCH",
+    "category": "HORIZON",
+    "httpStatus": 409,
+    "retryable": true,
+    "message": "Transaction sequence number does not match account sequence",
+    "remedy": "Reload account details from Horizon to obtain latest sequence number"
+  },
+  {
+    "code": 1044,
+    "slug": "ERR_HORIZON_BAD_AUTH",
+    "category": "HORIZON",
+    "httpStatus": 401,
+    "retryable": false,
+    "message": "Signature verification failed or signers do not meet threshold",
+    "remedy": "Verify signatures match registered signers and total weight meets threshold"
+  },
+  {
+    "code": 1045,
+    "slug": "ERR_HORIZON_BAD_AUTH_EXTRA",
+    "category": "HORIZON",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Extraneous unused signatures provided on envelope",
+    "remedy": "Remove unneeded signatures from transaction envelope before submit"
+  },
+  {
+    "code": 1046,
+    "slug": "ERR_HORIZON_TRUSTLINE_MISSING",
+    "category": "HORIZON",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Destination or source account lacks trustline for asset",
+    "remedy": "Submit change_trust operation for asset before transfer"
+  },
+  {
+    "code": 1047,
+    "slug": "ERR_HORIZON_TRUSTLINE_FULL",
+    "category": "HORIZON",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Transfer would exceed destination trustline limit",
+    "remedy": "Destination must increase trustline limit to receive payment"
+  },
+  {
+    "code": 1048,
+    "slug": "ERR_HORIZON_TRUSTLINE_REVOKED",
+    "category": "HORIZON",
+    "httpStatus": 403,
+    "retryable": false,
+    "message": "Asset trustline authorization was revoked by issuer",
+    "remedy": "Contact asset issuer to restore authorization flag"
+  },
+  {
+    "code": 1049,
+    "slug": "ERR_HORIZON_UNDERFUNDED",
+    "category": "HORIZON",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Operation source account has insufficient balance for operation",
+    "remedy": "Check specific asset balance for operation source account"
+  },
+  {
+    "code": 1050,
+    "slug": "ERR_HORIZON_FEE_UNDERPRICED",
+    "category": "HORIZON",
+    "httpStatus": 400,
+    "retryable": true,
+    "message": "Transaction fee per operation is below current network base fee",
+    "remedy": "Fetch latest base fee from Horizon and increase transaction max_fee"
+  },
+  {
+    "code": 1051,
+    "slug": "ERR_HORIZON_FEE_BURDEN_EXCEEDED",
+    "category": "HORIZON",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Total fee exceeds caller maximum configured fee limit",
+    "remedy": "Adjust maximum fee policy or wait for network congestion to clear"
+  },
+  {
+    "code": 1052,
+    "slug": "ERR_HORIZON_TX_BAD_SEQ",
+    "category": "HORIZON",
+    "httpStatus": 400,
+    "retryable": true,
+    "message": "Sequence number is not current sequence plus one",
+    "remedy": "Fetch fresh account state and re-sign with account.sequence + 1"
+  },
+  {
+    "code": 1053,
+    "slug": "ERR_HORIZON_TX_TOO_EARLY",
+    "category": "HORIZON",
+    "httpStatus": 400,
+    "retryable": true,
+    "message": "Transaction submitted before ledger time bounds valid range",
+    "remedy": "Wait until ledger close time satisfies timeBounds.minTime"
+  },
+  {
+    "code": 1054,
+    "slug": "ERR_HORIZON_TX_TOO_LATE",
+    "category": "HORIZON",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Transaction submitted after ledger time bounds expiration",
+    "remedy": "Rebuild transaction with updated maxTime bound"
+  },
+  {
+    "code": 1055,
+    "slug": "ERR_HORIZON_TX_MISSING_OPERATION",
+    "category": "HORIZON",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Transaction envelope contains zero operations",
+    "remedy": "Add at least one operation to transaction envelope"
+  },
+  {
+    "code": 1056,
+    "slug": "ERR_HORIZON_TX_TOO_MANY_OPS",
+    "category": "HORIZON",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Envelope exceeds maximum allowable operations limit",
+    "remedy": "Split operations into multiple transactions (max 100 operations per tx)"
+  },
+  {
+    "code": 1057,
+    "slug": "ERR_HORIZON_MEMO_INVALID",
+    "category": "HORIZON",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Memo type or character encoding violates Stellar rules",
+    "remedy": "Use Memo.text, Memo.id, Memo.hash, or Memo.return with valid format"
+  },
+  {
+    "code": 1058,
+    "slug": "ERR_HORIZON_MEMO_TOO_LONG",
+    "category": "HORIZON",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Text memo exceeds 28-byte maximum limit",
+    "remedy": "Truncate text memo to 28 bytes or use Memo.hash for 32-byte hash"
+  },
+  {
+    "code": 1059,
+    "slug": "ERR_HORIZON_SUBENTRY_LIMIT_EXCEEDED",
+    "category": "HORIZON",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Account cannot create more subentries (max 1000)",
+    "remedy": "Remove unused trustlines, offers, or signers to free subentry slots"
+  },
+  {
+    "code": 1060,
+    "slug": "ERR_HORIZON_CLAIMABLE_BALANCE_NOT_FOUND",
+    "category": "HORIZON",
+    "httpStatus": 404,
+    "retryable": false,
+    "message": "Claimable balance ID does not exist on ledger",
+    "remedy": "Verify balance ID hash or check if balance was already claimed"
+  },
+  {
+    "code": 1061,
+    "slug": "ERR_HORIZON_CLAIMABLE_BALANCE_EXPIRED",
+    "category": "HORIZON",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Claimable balance predicate has expired",
+    "remedy": "Check predicate time conditions; clawback or creator reclamation applies"
+  },
+  {
+    "code": 1062,
+    "slug": "ERR_HORIZON_CLAIMABLE_BALANCE_UNAVAILABLE",
+    "category": "HORIZON",
+    "httpStatus": 400,
+    "retryable": true,
+    "message": "Claimable balance predicate condition not yet satisfied",
+    "remedy": "Wait until predicate time or sequence condition becomes true"
+  },
+  {
+    "code": 1063,
+    "slug": "ERR_HORIZON_CLAIMABLE_BALANCE_CANNOT_CLAIM",
+    "category": "HORIZON",
+    "httpStatus": 403,
+    "retryable": false,
+    "message": "Account is not an authorized claimant",
+    "remedy": "Claim from one of the designated claimant public keys"
+  },
+  {
+    "code": 1064,
+    "slug": "ERR_HORIZON_SIGNER_LIMIT_EXCEEDED",
+    "category": "HORIZON",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Account has reached maximum 20 additional signers",
+    "remedy": "Remove existing signer before adding new signer"
+  },
+  {
+    "code": 1065,
+    "slug": "ERR_HORIZON_SIGNER_NOT_FOUND",
+    "category": "HORIZON",
+    "httpStatus": 404,
+    "retryable": false,
+    "message": "Attempted to remove signer that does not exist",
+    "remedy": "Inspect account signers list before issuing set_options"
+  },
+  {
+    "code": 1066,
+    "slug": "ERR_HORIZON_THRESHOLD_INVALID",
+    "category": "HORIZON",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Signer threshold weights invalid or unreachable",
+    "remedy": "Ensure combined signer weights can satisfy master/high thresholds"
+  },
+  {
+    "code": 1067,
+    "slug": "ERR_HORIZON_SPONSORSHIP_MISMATCH",
+    "category": "HORIZON",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Account or balance sponsorship state inconsistent",
+    "remedy": "Ensure begin_sponsoring and end_sponsoring pairs match correctly"
+  },
+  {
+    "code": 1068,
+    "slug": "ERR_HORIZON_SPONSORSHIP_LIMIT",
+    "category": "HORIZON",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Maximum sponsored reserve entries reached",
+    "remedy": "Revoke older sponsorships to sponsor new ledger entries"
+  },
+  {
+    "code": 1069,
+    "slug": "ERR_HORIZON_RPC_UNAVAILABLE",
+    "category": "HORIZON",
+    "httpStatus": 503,
+    "retryable": true,
+    "message": "Horizon server instance is unresponsive or desynced",
+    "remedy": "Failover to alternate public Horizon node e.g. horizon-testnet.stellar.org"
+  },
+  {
+    "code": 1070,
+    "slug": "ERR_HORIZON_LEDGER_CLOSED_AHEAD",
+    "category": "HORIZON",
+    "httpStatus": 400,
+    "retryable": true,
+    "message": "Requested ledger sequence has not yet closed",
+    "remedy": "Poll until current ledger sequence advances to requested sequence"
+  },
+  {
+    "code": 1071,
+    "slug": "ERR_HORIZON_LEDGER_PURGED",
+    "category": "HORIZON",
+    "httpStatus": 410,
+    "retryable": false,
+    "message": "Historical ledger data has been pruned by Horizon node",
+    "remedy": "Query an archival Horizon instance or Hubble data warehouse"
+  },
+  {
+    "code": 1072,
+    "slug": "ERR_HORIZON_SSE_STREAM_CLOSED",
+    "category": "HORIZON",
+    "httpStatus": 503,
+    "retryable": true,
+    "message": "Horizon event stream closed by server",
+    "remedy": "Reconnect SSE stream passing latest known cursor token"
+  },
+  {
+    "code": 1073,
+    "slug": "ERR_HORIZON_INTERNAL_SERVER_ERROR",
+    "category": "HORIZON",
+    "httpStatus": 500,
+    "retryable": true,
+    "message": "Horizon returned 500 internal error during query",
+    "remedy": "Retry with exponential backoff and jitter"
+  },
+  {
+    "code": 1074,
+    "slug": "ERR_HORIZON_RATE_LIMITED",
+    "category": "HORIZON",
+    "httpStatus": 429,
+    "retryable": true,
+    "message": "Horizon endpoint returned 429 Too Many Requests",
+    "remedy": "Reduce query concurrency or use authenticated RPC provider"
+  },
+  {
+    "code": 1075,
+    "slug": "ERR_HORIZON_INVALID_XDR",
+    "category": "HORIZON",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Failed to decode base64 transaction XDR envelope",
+    "remedy": "Validate base64 encoding and Stellar XDR schema definitions"
+  },
+  {
+    "code": 1076,
+    "slug": "ERR_HORIZON_TX_INTERNAL_ERROR",
+    "category": "HORIZON",
+    "httpStatus": 500,
+    "retryable": true,
+    "message": "Ledger core returned tx_internal_error during submit",
+    "remedy": "Check transaction result codes in Horizon error response extras"
+  },
+  {
+    "code": 1077,
+    "slug": "ERR_HORIZON_NETWORK_MISMATCH",
+    "category": "HORIZON",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Transaction passphrase does not match target network",
+    "remedy": "Sign with Networks.TESTNET or Networks.PUBLIC matching destination"
+  },
+  {
+    "code": 1078,
+    "slug": "ERR_HORIZON_CLAWBACK_NOT_ENABLED",
+    "category": "HORIZON",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Asset issuer has not enabled clawback flag",
+    "remedy": "Enable AUTH_CLAWBACK_ENABLED_FLAG before issuing clawback operations"
+  },
+  {
+    "code": 1079,
+    "slug": "ERR_HORIZON_UNKNOWN_ERROR",
+    "category": "HORIZON",
+    "httpStatus": 500,
+    "retryable": true,
+    "message": "Unclassified Stellar Core or Horizon failure",
+    "remedy": "Inspect full Horizon error response extras"
+  },
+  {
+    "code": 1080,
+    "slug": "ERR_SOROBAN_SIMULATION_FAILED",
+    "category": "SOROBAN",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Dry-run contract invocation returned failure",
+    "remedy": "Inspect simulation error details, contract panic messages, or host logs"
+  },
+  {
+    "code": 1081,
+    "slug": "ERR_SOROBAN_HOST_TRAP",
+    "category": "SOROBAN",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Host function trapped or contract panicked during execution",
+    "remedy": "Check contract invariants, arithmetic overflow, or assert failures"
+  },
+  {
+    "code": 1082,
+    "slug": "ERR_SOROBAN_BUDGET_CPU_EXCEEDED",
+    "category": "SOROBAN",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Invocation exceeded maximum CPU instruction budget",
+    "remedy": "Optimize loops, reduce hashing, or split computation across transactions"
+  },
+  {
+    "code": 1083,
+    "slug": "ERR_SOROBAN_BUDGET_MEMORY_EXCEEDED",
+    "category": "SOROBAN",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Invocation exceeded maximum memory allocation budget",
+    "remedy": "Reduce memory footprint and avoid large in-memory buffers"
+  },
+  {
+    "code": 1084,
+    "slug": "ERR_SOROBAN_FOOTPRINT_OVERFLOW",
+    "category": "SOROBAN",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Read/write ledger entry count exceeded footprint limit",
+    "remedy": "Minimize number of distinct ledger keys accessed in single invocation"
+  },
+  {
+    "code": 1085,
+    "slug": "ERR_SOROBAN_FOOTPRINT_BYTES_EXCEEDED",
+    "category": "SOROBAN",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Read/write footprint byte size exceeded maximum",
+    "remedy": "Pack storage structures and prune obsolete fields"
+  },
+  {
+    "code": 1086,
+    "slug": "ERR_SOROBAN_CONTRACT_NOT_FOUND",
+    "category": "SOROBAN",
+    "httpStatus": 404,
+    "retryable": false,
+    "message": "Contract ID does not exist in ledger state",
+    "remedy": "Verify contract address or deploy contract before invoking"
+  },
+  {
+    "code": 1087,
+    "slug": "ERR_SOROBAN_FUNCTION_NOT_FOUND",
+    "category": "SOROBAN",
+    "httpStatus": 404,
+    "retryable": false,
+    "message": "Contract does not export the requested function name",
+    "remedy": "Check contract ABI and verify exported function symbol spelling"
+  },
+  {
+    "code": 1088,
+    "slug": "ERR_SOROBAN_ARG_COUNT_MISMATCH",
+    "category": "SOROBAN",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Number of ScVal arguments does not match function signature",
+    "remedy": "Supply exact number of arguments required by contract method"
+  },
+  {
+    "code": 1089,
+    "slug": "ERR_SOROBAN_ARG_SERIALIZATION_FAILED",
+    "category": "SOROBAN",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Failed to serialize parameters to ScVal XDR",
+    "remedy": "Ensure arguments match expected ScVal types e.g. i128, address, symbol"
+  },
+  {
+    "code": 1090,
+    "slug": "ERR_SOROBAN_RETURN_DESERIALIZATION_FAILED",
+    "category": "SOROBAN",
+    "httpStatus": 500,
+    "retryable": false,
+    "message": "Failed to deserialize return ScVal to typed output",
+    "remedy": "Verify return type parser matches contract method return definition"
+  },
+  {
+    "code": 1091,
+    "slug": "ERR_SOROBAN_AUTH_MISSING",
+    "category": "SOROBAN",
+    "httpStatus": 401,
+    "retryable": false,
+    "message": "Invocation requires SorobanAuthorizationEntry not present",
+    "remedy": "Sign required authorization entries with appropriate address keypair"
+  },
+  {
+    "code": 1092,
+    "slug": "ERR_SOROBAN_AUTH_SIGNATURE_INVALID",
+    "category": "SOROBAN",
+    "httpStatus": 401,
+    "retryable": false,
+    "message": "Soroban authorization cryptographic signature invalid",
+    "remedy": "Check signer keypair and authorization hash calculation"
+  },
+  {
+    "code": 1093,
+    "slug": "ERR_SOROBAN_AUTH_EXPIRED",
+    "category": "SOROBAN",
+    "httpStatus": 400,
+    "retryable": true,
+    "message": "Authorization entry nonce or expiration ledger lapsed",
+    "remedy": "Generate fresh authorization entry with updated validUntilLedgerSeq"
+  },
+  {
+    "code": 1094,
+    "slug": "ERR_SOROBAN_AUTH_REPLAY_DETECTED",
+    "category": "SOROBAN",
+    "httpStatus": 409,
+    "retryable": false,
+    "message": "Authorization entry invocation nonce already consumed",
+    "remedy": "Increment authorization nonce and re-sign"
+  },
+  {
+    "code": 1095,
+    "slug": "ERR_SOROBAN_STORAGE_KEY_NOT_FOUND",
+    "category": "SOROBAN",
+    "httpStatus": 404,
+    "retryable": false,
+    "message": "Requested contract data storage key does not exist",
+    "remedy": "Verify storage key XDR and instance/temporary/persistent storage type"
+  },
+  {
+    "code": 1096,
+    "slug": "ERR_SOROBAN_STORAGE_TYPE_MISMATCH",
+    "category": "SOROBAN",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Storage entry value cannot be parsed as expected type",
+    "remedy": "Inspect storage entry data definition in contract code"
+  },
+  {
+    "code": 1097,
+    "slug": "ERR_SOROBAN_STORAGE_EXPIRED",
+    "category": "SOROBAN",
+    "httpStatus": 410,
+    "retryable": false,
+    "message": "Contract instance or data TTL expired; requires restoration",
+    "remedy": "Execute RestoreFootprintOp to restore expired storage entry"
+  },
+  {
+    "code": 1098,
+    "slug": "ERR_SOROBAN_STORAGE_TTL_LOW",
+    "category": "SOROBAN",
+    "httpStatus": 400,
+    "retryable": true,
+    "message": "Contract storage TTL is near threshold; bump required",
+    "remedy": "Submit ExtendFootprintTTLOp to extend entry lifetime"
+  },
+  {
+    "code": 1099,
+    "slug": "ERR_SOROBAN_RESTORE_FOOTPRINT_REQUIRED",
+    "category": "SOROBAN",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Expired entry requires RestoreFootprintOp before call",
+    "remedy": "Submit restore footprint operation in separate envelope first"
+  },
+  {
+    "code": 1100,
+    "slug": "ERR_SOROBAN_EXTEND_FOOTPRINT_REQUIRED",
+    "category": "SOROBAN",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Entry requires ExtendFootprintTTLOp to avoid expiration",
+    "remedy": "Add extend footprint operation to maintain entry persistence"
+  },
+  {
+    "code": 1101,
+    "slug": "ERR_SOROBAN_EVENT_FILTER_INVALID",
+    "category": "SOROBAN",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Event filter topics or contract IDs malformed",
+    "remedy": "Format topic filters as array of ScVal matching event structure"
+  },
+  {
+    "code": 1102,
+    "slug": "ERR_SOROBAN_EVENT_NOT_FOUND",
+    "category": "SOROBAN",
+    "httpStatus": 404,
+    "retryable": true,
+    "message": "No events match requested cursor and topic parameters",
+    "remedy": "Broaden startLedger or verify contract address emitted events"
+  },
+  {
+    "code": 1103,
+    "slug": "ERR_SOROBAN_TX_STATUS_NOT_FOUND",
+    "category": "SOROBAN",
+    "httpStatus": 404,
+    "retryable": true,
+    "message": "Transaction hash not indexed in RPC transaction status",
+    "remedy": "Wait a few seconds for RPC node indexing and poll getTransaction again"
+  },
+  {
+    "code": 1104,
+    "slug": "ERR_SOROBAN_TX_STATUS_FAILED",
+    "category": "SOROBAN",
+    "httpStatus": 500,
+    "retryable": false,
+    "message": "Submitted contract transaction failed during ledger apply",
+    "remedy": "Examine resultMetaXdr and error codes in getTransaction response"
+  },
+  {
+    "code": 1105,
+    "slug": "ERR_SOROBAN_TX_STILL_PENDING",
+    "category": "SOROBAN",
+    "httpStatus": 202,
+    "retryable": true,
+    "message": "Transaction status is still pending after maximum poll timeout",
+    "remedy": "Continue polling getTransaction until SUCCESS or FAILED state is returned"
+  },
+  {
+    "code": 1106,
+    "slug": "ERR_SOROBAN_WASM_INVALID",
+    "category": "SOROBAN",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Contract bytecode failed validation or is corrupted",
+    "remedy": "Recompile WASM with soroban-sdk and optimize with soroban-cli"
+  },
+  {
+    "code": 1107,
+    "slug": "ERR_SOROBAN_WASM_SIZE_EXCEEDED",
+    "category": "SOROBAN",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Compiled WASM binary exceeds maximum bytecode size limit",
+    "remedy": "Use wasm-opt -Oz and eliminate unused dependencies"
+  },
+  {
+    "code": 1108,
+    "slug": "ERR_SOROBAN_SAC_TRANSFER_FAILED",
+    "category": "SOROBAN",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Stellar Asset Contract transfer invocation failed",
+    "remedy": "Check balance, trustline authorization, and transfer amount"
+  },
+  {
+    "code": 1109,
+    "slug": "ERR_SOROBAN_SAC_ALLOWANCE_INSUFFICIENT",
+    "category": "SOROBAN",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Caller allowance is less than requested transfer amount",
+    "remedy": "Call approve on token contract to grant adequate spending allowance"
+  },
+  {
+    "code": 1110,
+    "slug": "ERR_SOROBAN_SAC_BALANCE_INSUFFICIENT",
+    "category": "SOROBAN",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Token holder balance insufficient for SAC transfer",
+    "remedy": "Fund payer account with sufficient token balance"
+  },
+  {
+    "code": 1111,
+    "slug": "ERR_SOROBAN_CROSS_CONTRACT_CALL_FAILED",
+    "category": "SOROBAN",
+    "httpStatus": 500,
+    "retryable": false,
+    "message": "Reentrant or sub-invocation of secondary contract failed",
+    "remedy": "Inspect sub-call trace and permissions on downstream contract"
+  },
+  {
+    "code": 1112,
+    "slug": "ERR_SOROBAN_RPC_NODE_DESYNCED",
+    "category": "SOROBAN",
+    "httpStatus": 503,
+    "retryable": true,
+    "message": "Soroban RPC node latest ledger lags behind Stellar Core",
+    "remedy": "Switch to synchronized RPC node endpoint"
+  },
+  {
+    "code": 1113,
+    "slug": "ERR_SOROBAN_RPC_UNHEALTHY",
+    "category": "SOROBAN",
+    "httpStatus": 503,
+    "retryable": true,
+    "message": "Soroban RPC health endpoint reports degraded status",
+    "remedy": "Check Soroban network health status page"
+  },
+  {
+    "code": 1114,
+    "slug": "ERR_SOROBAN_RPC_TIMEOUT",
+    "category": "SOROBAN",
+    "httpStatus": 504,
+    "retryable": true,
+    "message": "RPC call timed out awaiting simulation or transaction result",
+    "remedy": "Increase client RPC timeout and retry"
+  },
+  {
+    "code": 1115,
+    "slug": "ERR_SOROBAN_SIMULATION_EXPIRED",
+    "category": "SOROBAN",
+    "httpStatus": 400,
+    "retryable": true,
+    "message": "Simulation result envelope expired; must resimulate",
+    "remedy": "Run soroban_simulate_invocation again before transaction assembly"
+  },
+  {
+    "code": 1116,
+    "slug": "ERR_SOROBAN_UNAUTHORIZED_STORAGE_WRITE",
+    "category": "SOROBAN",
+    "httpStatus": 403,
+    "retryable": false,
+    "message": "Contract attempted write to read-only footprint key",
+    "remedy": "Add key to readWrite footprint rather than readOnly during assembly"
+  },
+  {
+    "code": 1117,
+    "slug": "ERR_SOROBAN_CUSTOM_CONTRACT_ERROR",
+    "category": "SOROBAN",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Contract threw custom error code defined in WASM",
+    "remedy": "Consult contract source code error enum definition"
+  },
+  {
+    "code": 1118,
+    "slug": "ERR_SOROBAN_SCHEMA_DECODE_FAILED",
+    "category": "SOROBAN",
+    "httpStatus": 500,
+    "retryable": false,
+    "message": "Contract metadata schema section decoding failed",
+    "remedy": "Verify contract was built with valid soroban-sdk environment metadata"
+  },
+  {
+    "code": 1119,
+    "slug": "ERR_SOROBAN_UNKNOWN_RPC_ERROR",
+    "category": "SOROBAN",
+    "httpStatus": 500,
+    "retryable": true,
+    "message": "Unclassified Soroban RPC node error",
+    "remedy": "Inspect RPC error code and message in JSON-RPC fault response"
+  },
+  {
+    "code": 1120,
+    "slug": "ERR_PAYWALL_PAYMENT_REQUIRED",
+    "category": "PAYWALL",
+    "httpStatus": 402,
+    "retryable": false,
+    "message": "Request requires payment header (HTTP 402 Payment Required)",
+    "remedy": "Inspect X-Payment-Challenge header, settle payment on Stellar, and retry with signature"
+  },
+  {
+    "code": 1121,
+    "slug": "ERR_PAYWALL_CHALLENGE_MISSING",
+    "category": "PAYWALL",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "X-Payment-Challenge header is missing from request",
+    "remedy": "Initiate tool call without headers first to receive payment challenge"
+  },
+  {
+    "code": 1122,
+    "slug": "ERR_PAYWALL_CHALLENGE_EXPIRED",
+    "category": "PAYWALL",
+    "httpStatus": 400,
+    "retryable": true,
+    "message": "Payment challenge timestamp exceeds validity window",
+    "remedy": "Request a fresh payment challenge and settle within TTL duration"
+  },
+  {
+    "code": 1123,
+    "slug": "ERR_PAYWALL_CHALLENGE_INVALID",
+    "category": "PAYWALL",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Payment challenge hash does not match server expectation",
+    "remedy": "Ensure challenge hash calculation matches sha256 of challenge parameters"
+  },
+  {
+    "code": 1124,
+    "slug": "ERR_PAYWALL_SIGNATURE_MISSING",
+    "category": "PAYWALL",
+    "httpStatus": 401,
+    "retryable": false,
+    "message": "X-Payment-Signature header is missing from request",
+    "remedy": "Provide signed challenge transaction hash in X-Payment-Signature header"
+  },
+  {
+    "code": 1125,
+    "slug": "ERR_PAYWALL_SIGNATURE_INVALID",
+    "category": "PAYWALL",
+    "httpStatus": 401,
+    "retryable": false,
+    "message": "Payment signature could not be cryptographically verified",
+    "remedy": "Sign the exact challenge hash with payer ed25519 secret key"
+  },
+  {
+    "code": 1126,
+    "slug": "ERR_PAYWALL_AMOUNT_UNDERPAID",
+    "category": "PAYWALL",
+    "httpStatus": 402,
+    "retryable": false,
+    "message": "Settled payment amount is less than tool invocation price",
+    "remedy": "Submit transaction paying at least the required amount specified in challenge"
+  },
+  {
+    "code": 1127,
+    "slug": "ERR_PAYWALL_ASSET_MISMATCH",
+    "category": "PAYWALL",
+    "httpStatus": 402,
+    "retryable": false,
+    "message": "Payment was made in asset different from required asset",
+    "remedy": "Pay with required asset e.g. native XLM or designated USDC contract address"
+  },
+  {
+    "code": 1128,
+    "slug": "ERR_PAYWALL_RECIPIENT_MISMATCH",
+    "category": "PAYWALL",
+    "httpStatus": 402,
+    "retryable": false,
+    "message": "Payment recipient address does not match server receiver",
+    "remedy": "Ensure destination address matches server recipient specified in challenge"
+  },
+  {
+    "code": 1129,
+    "slug": "ERR_PAYWALL_TRANSACTION_FAILED",
+    "category": "PAYWALL",
+    "httpStatus": 402,
+    "retryable": false,
+    "message": "Payment transaction submitted by agent failed on-chain",
+    "remedy": "Check account balance and sequence before submitting payment transaction"
+  },
+  {
+    "code": 1130,
+    "slug": "ERR_PAYWALL_TRANSACTION_NOT_FOUND",
+    "category": "PAYWALL",
+    "httpStatus": 404,
+    "retryable": true,
+    "message": "Transaction hash not found on Stellar ledger",
+    "remedy": "Verify transaction was submitted and closed in ledger before claiming"
+  },
+  {
+    "code": 1131,
+    "slug": "ERR_PAYWALL_TRANSACTION_UNCONFIRMED",
+    "category": "PAYWALL",
+    "httpStatus": 202,
+    "retryable": true,
+    "message": "Transaction not yet finalized; confirmation pending",
+    "remedy": "Wait 2-3 seconds for ledger close and retry verification"
+  },
+  {
+    "code": 1132,
+    "slug": "ERR_PAYWALL_TOKEN_DISALLOWED",
+    "category": "PAYWALL",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Caller attempted payment with unauthorized or unlisted token",
+    "remedy": "Choose an accepted token from the allowed tokens list"
+  },
+  {
+    "code": 1133,
+    "slug": "ERR_PAYWALL_TIER_FORBIDDEN",
+    "category": "PAYWALL",
+    "httpStatus": 403,
+    "retryable": false,
+    "message": "Caller tier is not permitted to access this tool",
+    "remedy": "Upgrade subscription tier or use open tier endpoint"
+  },
+  {
+    "code": 1134,
+    "slug": "ERR_PAYWALL_RATE_LIMIT_HIT",
+    "category": "PAYWALL",
+    "httpStatus": 429,
+    "retryable": true,
+    "message": "Caller has exceeded rate limit for paywalled endpoint",
+    "remedy": "Slow down invocation frequency to match allowed quota"
+  },
+  {
+    "code": 1135,
+    "slug": "ERR_PAYWALL_DYNAMIC_PRICING_FAILED",
+    "category": "PAYWALL",
+    "httpStatus": 500,
+    "retryable": true,
+    "message": "Pricing engine failed to compute dynamic price tier",
+    "remedy": "Retry or fallback to static base price"
+  },
+  {
+    "code": 1136,
+    "slug": "ERR_PAYWALL_MEMO_REQUIRED",
+    "category": "PAYWALL",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Payment requires specific memo matching challenge hash",
+    "remedy": "Include challenge hash as transaction memo when submitting payment"
+  },
+  {
+    "code": 1137,
+    "slug": "ERR_PAYWALL_MEMO_MISMATCH",
+    "category": "PAYWALL",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Payment memo does not match challenge identifier",
+    "remedy": "Verify memo matches challenge id exactly"
+  },
+  {
+    "code": 1138,
+    "slug": "ERR_PAYWALL_ESCROW_RELEASE_FAILED",
+    "category": "PAYWALL",
+    "httpStatus": 500,
+    "retryable": true,
+    "message": "State channel or claimable escrow release failed",
+    "remedy": "Check escrow authorization and claimant signature"
+  },
+  {
+    "code": 1139,
+    "slug": "ERR_PAYWALL_CHANNEL_EXHAUSTED",
+    "category": "PAYWALL",
+    "httpStatus": 402,
+    "retryable": false,
+    "message": "Pre-funded micro-payment channel has zero remaining balance",
+    "remedy": "Deposit additional funds to channel or open a new channel"
+  },
+  {
+    "code": 1140,
+    "slug": "ERR_PAYWALL_CHANNEL_EXPIRED",
+    "category": "PAYWALL",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Pre-funded payment channel has expired",
+    "remedy": "Open a fresh payment channel with a future expiry ledger"
+  },
+  {
+    "code": 1141,
+    "slug": "ERR_PAYWALL_CHANNEL_NONCE_STALE",
+    "category": "PAYWALL",
+    "httpStatus": 409,
+    "retryable": false,
+    "message": "Channel voucher nonce is lower than last recorded nonce",
+    "remedy": "Issue voucher with incremented nonce strictly greater than current"
+  },
+  {
+    "code": 1142,
+    "slug": "ERR_PAYWALL_CHANNEL_SIG_INVALID",
+    "category": "PAYWALL",
+    "httpStatus": 401,
+    "retryable": false,
+    "message": "Merchant or payer voucher signature is invalid",
+    "remedy": "Re-sign voucher payload with valid payer key"
+  },
+  {
+    "code": 1143,
+    "slug": "ERR_PAYWALL_CHANNEL_DISPUTED",
+    "category": "PAYWALL",
+    "httpStatus": 409,
+    "retryable": false,
+    "message": "Payment channel is currently in dispute status",
+    "remedy": "Wait for dispute resolution period to conclude on-chain"
+  },
+  {
+    "code": 1144,
+    "slug": "ERR_PAYWALL_DECIMALS_MISMATCH",
+    "category": "PAYWALL",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Token amount fractional precision violates asset standard",
+    "remedy": "Format amount using 7 decimals for XLM or 6 decimals for USDC"
+  },
+  {
+    "code": 1145,
+    "slug": "ERR_PAYWALL_EXCHANGE_RATE_STALE",
+    "category": "PAYWALL",
+    "httpStatus": 503,
+    "retryable": true,
+    "message": "Oracle price feed for multi-token conversion is stale",
+    "remedy": "Wait for oracle price update or pay in base asset"
+  },
+  {
+    "code": 1146,
+    "slug": "ERR_PAYWALL_SLIPPAGE_EXCEEDED",
+    "category": "PAYWALL",
+    "httpStatus": 400,
+    "retryable": true,
+    "message": "Dynamic price calculation exceeded slippage threshold",
+    "remedy": "Increase allowed slippage or refresh challenge quote"
+  },
+  {
+    "code": 1147,
+    "slug": "ERR_PAYWALL_CREDIT_INSUFFICIENT",
+    "category": "PAYWALL",
+    "httpStatus": 402,
+    "retryable": false,
+    "message": "Pre-paid balance or credit line insufficient for tool call",
+    "remedy": "Top up prepaid credit balance before invoking tool"
+  },
+  {
+    "code": 1148,
+    "slug": "ERR_PAYWALL_VERIFIER_TIMEOUT",
+    "category": "PAYWALL",
+    "httpStatus": 504,
+    "retryable": true,
+    "message": "On-chain transaction verifier timed out querying ledger",
+    "remedy": "Retry verification with increased timeout"
+  },
+  {
+    "code": 1149,
+    "slug": "ERR_PAYWALL_RPC_DOWN",
+    "category": "PAYWALL",
+    "httpStatus": 503,
+    "retryable": true,
+    "message": "All fallback Horizon and Soroban nodes unreachable for verification",
+    "remedy": "Check network connectivity and provider availability"
+  },
+  {
+    "code": 1150,
+    "slug": "ERR_PAYWALL_DUPLICATE_SETTLEMENT",
+    "category": "PAYWALL",
+    "httpStatus": 409,
+    "retryable": false,
+    "message": "Payment transaction hash was already settled previously",
+    "remedy": "Submit a unique transaction for every tool invocation"
+  },
+  {
+    "code": 1151,
+    "slug": "ERR_PAYWALL_UNSUPPORTED_METHOD",
+    "category": "PAYWALL",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Requested payment modality is not supported by paywall",
+    "remedy": "Use supported payment method: direct_transfer, sac_transfer, or channel"
+  },
+  {
+    "code": 1152,
+    "slug": "ERR_PAYWALL_MINIMUM_PRICE",
+    "category": "PAYWALL",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Computed invocation fee is below tool minimum threshold",
+    "remedy": "Ensure price meets tool minimum baseline"
+  },
+  {
+    "code": 1153,
+    "slug": "ERR_PAYWALL_MAXIMUM_PRICE",
+    "category": "PAYWALL",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Computed invocation fee exceeds tool maximum price cap",
+    "remedy": "Clamp dynamic pricing within allowed boundaries"
+  },
+  {
+    "code": 1154,
+    "slug": "ERR_PAYWALL_COMPUTE_PRICE_EXCEEDED",
+    "category": "PAYWALL",
+    "httpStatus": 402,
+    "retryable": false,
+    "message": "Tool compute consumption exceeded estimated ceiling",
+    "remedy": "Authorize higher compute allowance for heavy queries"
+  },
+  {
+    "code": 1155,
+    "slug": "ERR_PAYWALL_REFUND_FAILED",
+    "category": "PAYWALL",
+    "httpStatus": 500,
+    "retryable": true,
+    "message": "Automated refund for overpaid invocation could not be processed",
+    "remedy": "Contact merchant support with transaction hash for manual refund"
+  },
+  {
+    "code": 1156,
+    "slug": "ERR_PAYWALL_AUTH_HEADER_MALFORMED",
+    "category": "PAYWALL",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Authorization or payment header format invalid",
+    "remedy": "Format header as X-Payment-Signature: tx_hash=...;payer=..."
+  },
+  {
+    "code": 1157,
+    "slug": "ERR_PAYWALL_SEP0043_PARSE_ERROR",
+    "category": "PAYWALL",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "SEP-0043 challenge structure cannot be deserialized",
+    "remedy": "Verify compliance with SEP-0043 payload specification"
+  },
+  {
+    "code": 1158,
+    "slug": "ERR_PAYWALL_LEDGER_TOO_OLD",
+    "category": "PAYWALL",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Payment transaction ledger is older than maximum allowed lookback",
+    "remedy": "Pay using recent transaction within last 100 ledgers"
+  },
+  {
+    "code": 1159,
+    "slug": "ERR_PAYWALL_UNKNOWN_VERIFICATION_ERROR",
+    "category": "PAYWALL",
+    "httpStatus": 500,
+    "retryable": true,
+    "message": "Unclassified paywall verification failure",
+    "remedy": "Check verifier debug logs for detailed trace"
+  },
+  {
+    "code": 1160,
+    "slug": "ERR_REPLAY_TX_HASH_CLAIMED",
+    "category": "REPLAY",
+    "httpStatus": 409,
+    "retryable": false,
+    "message": "Transaction hash already exists in claimed nonces registry",
+    "remedy": "Every tool invocation requires a fresh, unspent transaction"
+  },
+  {
+    "code": 1161,
+    "slug": "ERR_REPLAY_NONCE_REUSED",
+    "category": "REPLAY",
+    "httpStatus": 409,
+    "retryable": false,
+    "message": "Voucher or challenge nonce has already been consumed",
+    "remedy": "Generate a new nonce for each challenge session"
+  },
+  {
+    "code": 1162,
+    "slug": "ERR_REPLAY_TTL_EXPIRED",
+    "category": "REPLAY",
+    "httpStatus": 400,
+    "retryable": true,
+    "message": "Challenge or reservation TTL has expired before claim",
+    "remedy": "Reissue payment request to obtain a fresh TTL window"
+  },
+  {
+    "code": 1163,
+    "slug": "ERR_REPLAY_CACHE_UNAVAILABLE",
+    "category": "REPLAY",
+    "httpStatus": 503,
+    "retryable": true,
+    "message": "In-memory or Redis LRU cache backend is disconnected",
+    "remedy": "Ensure Redis or memory adapter is accessible and healthy"
+  },
+  {
+    "code": 1164,
+    "slug": "ERR_REPLAY_CACHE_WRITE_FAILED",
+    "category": "REPLAY",
+    "httpStatus": 500,
+    "retryable": true,
+    "message": "Failed to record claimed payment to replay storage",
+    "remedy": "Verify storage disk capacity and write permissions"
+  },
+  {
+    "code": 1165,
+    "slug": "ERR_REPLAY_CACHE_READ_FAILED",
+    "category": "REPLAY",
+    "httpStatus": 500,
+    "retryable": true,
+    "message": "Failed to query replay storage for transaction status",
+    "remedy": "Check cache connectivity and query syntax"
+  },
+  {
+    "code": 1166,
+    "slug": "ERR_REPLAY_CONCURRENT_CLAIM",
+    "category": "REPLAY",
+    "httpStatus": 409,
+    "retryable": false,
+    "message": "Multiple concurrent requests attempted to claim identical payment",
+    "remedy": "Serialize requests or use unique payment transactions"
+  },
+  {
+    "code": 1167,
+    "slug": "ERR_REPLAY_LOCK_TIMEOUT",
+    "category": "REPLAY",
+    "httpStatus": 504,
+    "retryable": true,
+    "message": "Timed out acquiring distributed lock for transaction settlement",
+    "remedy": "Retry operation after lock release"
+  },
+  {
+    "code": 1168,
+    "slug": "ERR_REPLAY_STORAGE_CORRUPTED",
+    "category": "REPLAY",
+    "httpStatus": 500,
+    "retryable": false,
+    "message": "Replay protection cache entry data structure corrupted",
+    "remedy": "Clear corrupted key and inspect database integrity"
+  },
+  {
+    "code": 1169,
+    "slug": "ERR_REPLAY_KEY_COLLISION",
+    "category": "REPLAY",
+    "httpStatus": 409,
+    "retryable": false,
+    "message": "Hash collision detected in deduplication index",
+    "remedy": "Use sha256 with full transaction envelope for indexing"
+  },
+  {
+    "code": 1170,
+    "slug": "ERR_REPLAY_CLOCK_SKEW_DETECTED",
+    "category": "REPLAY",
+    "httpStatus": 400,
+    "retryable": true,
+    "message": "Server timestamp deviates excessively from ledger timestamp",
+    "remedy": "Synchronize system clock with NTP time server"
+  },
+  {
+    "code": 1171,
+    "slug": "ERR_REPLAY_CAPACITY_EXCEEDED",
+    "category": "REPLAY",
+    "httpStatus": 507,
+    "retryable": true,
+    "message": "Replay cache storage reached maximum entry limit",
+    "remedy": "Trigger LRU eviction or increase maximum capacity"
+  },
+  {
+    "code": 1172,
+    "slug": "ERR_REPLAY_EVICTION_FAILED",
+    "category": "REPLAY",
+    "httpStatus": 500,
+    "retryable": true,
+    "message": "Failed to evict expired records during pruning routine",
+    "remedy": "Run manual prune or restart storage daemon"
+  },
+  {
+    "code": 1173,
+    "slug": "ERR_REPLAY_INVALID_TTL",
+    "category": "REPLAY",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Configured TTL duration is negative or exceeds maximum bound",
+    "remedy": "Specify TTL between 1 second and 86400 seconds (24 hours)"
+  },
+  {
+    "code": 1174,
+    "slug": "ERR_REPLAY_STORE_UNINITIALIZED",
+    "category": "REPLAY",
+    "httpStatus": 500,
+    "retryable": true,
+    "message": "Replay store accessed prior to initialization",
+    "remedy": "Call init() on ReplayProtector before serving requests"
+  },
+  {
+    "code": 1175,
+    "slug": "ERR_REPLAY_LOCK_RELEASE_FAILED",
+    "category": "REPLAY",
+    "httpStatus": 500,
+    "retryable": true,
+    "message": "Failed to release acquired mutex lock on payment hash",
+    "remedy": "Ensure lock TTL auto-releases to prevent deadlocks"
+  },
+  {
+    "code": 1176,
+    "slug": "ERR_REPLAY_UNSUPPORTED_ADAPTER",
+    "category": "REPLAY",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Requested storage backend adapter is not supported",
+    "remedy": "Use memory or redis adapter"
+  },
+  {
+    "code": 1177,
+    "slug": "ERR_REPLAY_REDIS_CONNECTION_REFUSED",
+    "category": "REPLAY",
+    "httpStatus": 503,
+    "retryable": true,
+    "message": "Redis cache server refused connection",
+    "remedy": "Verify Redis server address, port, and network security groups"
+  },
+  {
+    "code": 1178,
+    "slug": "ERR_REPLAY_REDIS_AUTH_FAILED",
+    "category": "REPLAY",
+    "httpStatus": 401,
+    "retryable": false,
+    "message": "Redis authentication password or ACL rejected",
+    "remedy": "Supply correct REDIS_PASSWORD in environment configuration"
+  },
+  {
+    "code": 1179,
+    "slug": "ERR_REPLAY_REDIS_TIMEOUT",
+    "category": "REPLAY",
+    "httpStatus": 504,
+    "retryable": true,
+    "message": "Redis operation timed out during replay check",
+    "remedy": "Increase REDIS_TIMEOUT_MS or investigate Redis cluster latency"
+  },
+  {
+    "code": 1180,
+    "slug": "ERR_REPLAY_STATE_INCONSISTENT",
+    "category": "REPLAY",
+    "httpStatus": 500,
+    "retryable": false,
+    "message": "Replay record exists without valid corresponding metadata",
+    "remedy": "Prune orphaned record and revalidate payment"
+  },
+  {
+    "code": 1181,
+    "slug": "ERR_REPLAY_DUPLICATE_VOUCHER",
+    "category": "REPLAY",
+    "httpStatus": 409,
+    "retryable": false,
+    "message": "Bilateral channel voucher sequence number previously executed",
+    "remedy": "Submit next sequential voucher in channel session"
+  },
+  {
+    "code": 1182,
+    "slug": "ERR_REPLAY_PRUNING_IN_PROGRESS",
+    "category": "REPLAY",
+    "httpStatus": 503,
+    "retryable": true,
+    "message": "Replay store busy running memory compaction",
+    "remedy": "Retry query in a few milliseconds"
+  },
+  {
+    "code": 1183,
+    "slug": "ERR_REPLAY_QUOTA_EXCEEDED",
+    "category": "REPLAY",
+    "httpStatus": 429,
+    "retryable": true,
+    "message": "Maximum daily claims per caller address exceeded",
+    "remedy": "Wait until daily quota resets at 00:00 UTC"
+  },
+  {
+    "code": 1184,
+    "slug": "ERR_REPLAY_NONCE_OUT_OF_ORDER",
+    "category": "REPLAY",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Nonce received out of strict monotonic sequence",
+    "remedy": "Submit vouchers with monotonic strictly increasing sequence numbers"
+  },
+  {
+    "code": 1185,
+    "slug": "ERR_REPLAY_PERSISTENCE_FAILED",
+    "category": "REPLAY",
+    "httpStatus": 500,
+    "retryable": true,
+    "message": "Failed to persist replay log to durable storage",
+    "remedy": "Check disk I/O and storage volume health"
+  },
+  {
+    "code": 1186,
+    "slug": "ERR_REPLAY_RESTORATION_FAILED",
+    "category": "REPLAY",
+    "httpStatus": 500,
+    "retryable": false,
+    "message": "Failed to restore replay cache state from snapshot",
+    "remedy": "Verify snapshot file format and checksum"
+  },
+  {
+    "code": 1187,
+    "slug": "ERR_REPLAY_INVALID_HASH_FORMAT",
+    "category": "REPLAY",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Payment hash string is not valid 64-character hex",
+    "remedy": "Provide lowercase 64-character hexadecimal transaction hash"
+  },
+  {
+    "code": 1188,
+    "slug": "ERR_REPLAY_INTEGRITY_CHECK_FAILED",
+    "category": "REPLAY",
+    "httpStatus": 500,
+    "retryable": false,
+    "message": "Storage checksum validation failed for replay block",
+    "remedy": "Reinitialize storage block from primary backup"
+  },
+  {
+    "code": 1189,
+    "slug": "ERR_REPLAY_UNKNOWN_ERROR",
+    "category": "REPLAY",
+    "httpStatus": 500,
+    "retryable": true,
+    "message": "Unclassified anti-replay storage failure",
+    "remedy": "Inspect replay storage system logs"
+  },
+  {
+    "code": 1190,
+    "slug": "ERR_CLIENT_BUDGET_CALL_EXCEEDED",
+    "category": "CLIENT",
+    "httpStatus": 403,
+    "retryable": false,
+    "message": "Invocation cost exceeds maxSpendPerCall limit",
+    "remedy": "Increase maxSpendPerCall budget policy on agent client"
+  },
+  {
+    "code": 1191,
+    "slug": "ERR_CLIENT_BUDGET_SESSION_EXCEEDED",
+    "category": "CLIENT",
+    "httpStatus": 403,
+    "retryable": false,
+    "message": "Total spending exceeds maxSpendPerSession budget cap",
+    "remedy": "Reset session spending budget or raise session ceiling"
+  },
+  {
+    "code": 1192,
+    "slug": "ERR_CLIENT_BUDGET_DAILY_EXCEEDED",
+    "category": "CLIENT",
+    "httpStatus": 403,
+    "retryable": false,
+    "message": "Daily cumulative spend limit reached",
+    "remedy": "Wait until daily budget rollover or adjust daily limit"
+  },
+  {
+    "code": 1193,
+    "slug": "ERR_CLIENT_PROVIDER_NOT_WHITELISTED",
+    "category": "CLIENT",
+    "httpStatus": 403,
+    "retryable": false,
+    "message": "Tool provider address is not on approved whitelist",
+    "remedy": "Add server recipient address to allowedProviders list"
+  },
+  {
+    "code": 1194,
+    "slug": "ERR_CLIENT_ASSET_NOT_APPROVED",
+    "category": "CLIENT",
+    "httpStatus": 403,
+    "retryable": false,
+    "message": "Requested payment asset is not approved in agent policy",
+    "remedy": "Authorize asset code/issuer or SAC contract address in agent wallet policy"
+  },
+  {
+    "code": 1195,
+    "slug": "ERR_CLIENT_KEY_DERIVATION_FAILED",
+    "category": "CLIENT",
+    "httpStatus": 500,
+    "retryable": false,
+    "message": "Failed to derive keypair from mnemonic or seed phrase",
+    "remedy": "Verify BIP-39 mnemonic phrase words and derivation path"
+  },
+  {
+    "code": 1196,
+    "slug": "ERR_CLIENT_PRIVATE_KEY_MISSING",
+    "category": "CLIENT",
+    "httpStatus": 401,
+    "retryable": false,
+    "message": "Wallet signer lacks private key for required address",
+    "remedy": "Load signing keypair into InMemoryWalletSigner before transacting"
+  },
+  {
+    "code": 1197,
+    "slug": "ERR_CLIENT_SIGNING_REJECTED",
+    "category": "CLIENT",
+    "httpStatus": 403,
+    "retryable": false,
+    "message": "Local wallet policy rejected signature request",
+    "remedy": "Review wallet signing policy constraints"
+  },
+  {
+    "code": 1198,
+    "slug": "ERR_CLIENT_CIRCUIT_OPEN",
+    "category": "CLIENT",
+    "httpStatus": 503,
+    "retryable": false,
+    "message": "Circuit breaker is OPEN; refusing network calls to failing host",
+    "remedy": "Wait for reset timeout period before probe request (HALF-OPEN)"
+  },
+  {
+    "code": 1199,
+    "slug": "ERR_CLIENT_CIRCUIT_HALF_OPEN_FAIL",
+    "category": "CLIENT",
+    "httpStatus": 503,
+    "retryable": false,
+    "message": "Probe request failed in HALF-OPEN state; circuit reopened",
+    "remedy": "Allow upstream host sufficient time to recover before retrying"
+  },
+  {
+    "code": 1200,
+    "slug": "ERR_CLIENT_RETRY_EXHAUSTED",
+    "category": "CLIENT",
+    "httpStatus": 504,
+    "retryable": false,
+    "message": "Maximum retry attempts reached for transient error",
+    "remedy": "Investigate root cause of recurring failures"
+  },
+  {
+    "code": 1201,
+    "slug": "ERR_CLIENT_FINALITY_TIMEOUT",
+    "category": "CLIENT",
+    "httpStatus": 504,
+    "retryable": true,
+    "message": "Polling for ledger finality exceeded max timeout",
+    "remedy": "Check transaction hash directly on Horizon explorer"
+  },
+  {
+    "code": 1202,
+    "slug": "ERR_CLIENT_UNEXPECTED_RESPONSE",
+    "category": "CLIENT",
+    "httpStatus": 502,
+    "retryable": true,
+    "message": "Server returned unexpected response format or status",
+    "remedy": "Ensure server is running compatible stellar-x402-mcp version"
+  },
+  {
+    "code": 1203,
+    "slug": "ERR_CLIENT_CHALLENGE_RESOLUTION_FAILED",
+    "category": "CLIENT",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Agent client failed to resolve 402 payment challenge",
+    "remedy": "Verify challenge parameters and payer account balance"
+  },
+  {
+    "code": 1204,
+    "slug": "ERR_CLIENT_INSUFFICIENT_FUNDS",
+    "category": "CLIENT",
+    "httpStatus": 402,
+    "retryable": false,
+    "message": "Agent wallet has insufficient funds to pay challenge",
+    "remedy": "Transfer funds to agent wallet address"
+  },
+  {
+    "code": 1205,
+    "slug": "ERR_CLIENT_AUTO_PAY_DISABLED",
+    "category": "CLIENT",
+    "httpStatus": 403,
+    "retryable": false,
+    "message": "Client has autoPayment enabled = false; manual sign required",
+    "remedy": "Enable autoPayment or manually sign payment challenge"
+  },
+  {
+    "code": 1206,
+    "slug": "ERR_CLIENT_CONFIG_INVALID",
+    "category": "CLIENT",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Client configuration failed schema validation",
+    "remedy": "Pass valid networkPassphrase, rpcUrl, and spending caps"
+  },
+  {
+    "code": 1207,
+    "slug": "ERR_CLIENT_ENVELOPE_BUILD_FAILED",
+    "category": "CLIENT",
+    "httpStatus": 500,
+    "retryable": false,
+    "message": "Failed to construct Stellar transaction envelope",
+    "remedy": "Verify source account sequence and operation fields"
+  },
+  {
+    "code": 1208,
+    "slug": "ERR_CLIENT_FEE_BUMP_UNSUPPORTED",
+    "category": "CLIENT",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Client or relayer does not support fee-bump sponsorship",
+    "remedy": "Ensure payer account has native XLM for transaction fees"
+  },
+  {
+    "code": 1209,
+    "slug": "ERR_CLIENT_SPONSOR_DECLINED",
+    "category": "CLIENT",
+    "httpStatus": 403,
+    "retryable": false,
+    "message": "Fee sponsor refused to co-sign transaction envelope",
+    "remedy": "Verify fee sponsor quota and policy rules"
+  },
+  {
+    "code": 1210,
+    "slug": "ERR_CLIENT_CHANNEL_NOT_FOUND",
+    "category": "CLIENT",
+    "httpStatus": 404,
+    "retryable": false,
+    "message": "Agent has no active state channel with target provider",
+    "remedy": "Open and fund a state channel before issuing vouchers"
+  },
+  {
+    "code": 1211,
+    "slug": "ERR_CLIENT_CHANNEL_DEFICIT",
+    "category": "CLIENT",
+    "httpStatus": 402,
+    "retryable": false,
+    "message": "State channel deposit insufficient for micro-voucher",
+    "remedy": "Top up channel balance or settle via direct payment"
+  },
+  {
+    "code": 1212,
+    "slug": "ERR_CLIENT_CONNECTION_DROPPED",
+    "category": "CLIENT",
+    "httpStatus": 503,
+    "retryable": true,
+    "message": "Client disconnected from remote MCP server during call",
+    "remedy": "Re-establish connection and resend request"
+  },
+  {
+    "code": 1213,
+    "slug": "ERR_CLIENT_DNS_RESOLUTION_FAILED",
+    "category": "CLIENT",
+    "httpStatus": 502,
+    "retryable": true,
+    "message": "Failed to resolve MCP server host domain",
+    "remedy": "Check network DNS settings and hostname spelling"
+  },
+  {
+    "code": 1214,
+    "slug": "ERR_CLIENT_CERT_VALIDATION_FAILED",
+    "category": "CLIENT",
+    "httpStatus": 495,
+    "retryable": false,
+    "message": "SSL/TLS certificate validation failed for server endpoint",
+    "remedy": "Ensure server provides trusted CA-signed TLS certificate"
+  },
+  {
+    "code": 1215,
+    "slug": "ERR_CLIENT_POLICY_DENIED",
+    "category": "CLIENT",
+    "httpStatus": 403,
+    "retryable": false,
+    "message": "Custom agent guardrail policy denied tool execution",
+    "remedy": "Check agent safety guardrails and policy configuration"
+  },
+  {
+    "code": 1216,
+    "slug": "ERR_CLIENT_SESSION_INIT_FAILED",
+    "category": "CLIENT",
+    "httpStatus": 500,
+    "retryable": true,
+    "message": "Failed to negotiate session parameters with MCP server",
+    "remedy": "Verify server protocol capabilities and retry"
+  },
+  {
+    "code": 1217,
+    "slug": "ERR_CLIENT_PAYMENT_LOOP_DETECTED",
+    "category": "CLIENT",
+    "httpStatus": 508,
+    "retryable": false,
+    "message": "Agent detected cyclical payment requests for single tool",
+    "remedy": "Abort call to prevent infinite drain loop"
+  },
+  {
+    "code": 1218,
+    "slug": "ERR_CLIENT_SIGNER_DISCONNECTED",
+    "category": "CLIENT",
+    "httpStatus": 503,
+    "retryable": true,
+    "message": "Hardware wallet or external signer disconnected",
+    "remedy": "Reconnect hardware signer and confirm device unlock"
+  },
+  {
+    "code": 1219,
+    "slug": "ERR_CLIENT_UNKNOWN_FAULT",
+    "category": "CLIENT",
+    "httpStatus": 500,
+    "retryable": true,
+    "message": "Unclassified agent client runtime error",
+    "remedy": "Inspect agent client stack trace"
+  },
+  {
+    "code": 1220,
+    "slug": "ERR_DEX_NO_PAYMENT_PATH",
+    "category": "DEX",
+    "httpStatus": 404,
+    "retryable": false,
+    "message": "No liquidity path exists between source and destination assets",
+    "remedy": "Verify orderbook offers or AMM liquidity pools exist for asset pair"
+  },
+  {
+    "code": 1221,
+    "slug": "ERR_DEX_MAX_SEND_EXCEEDED",
+    "category": "DEX",
+    "httpStatus": 400,
+    "retryable": true,
+    "message": "Path payment requires sending more than maximum send limit",
+    "remedy": "Increase sendMax parameter or split trade into smaller amounts"
+  },
+  {
+    "code": 1222,
+    "slug": "ERR_DEX_MIN_RECEIVE_UNMET",
+    "category": "DEX",
+    "httpStatus": 400,
+    "retryable": true,
+    "message": "Path payment yields less than minimum receive threshold",
+    "remedy": "Decrease destMin parameter or wait for better market liquidity"
+  },
+  {
+    "code": 1223,
+    "slug": "ERR_DEX_SLIPPAGE_EXCEEDED",
+    "category": "DEX",
+    "httpStatus": 400,
+    "retryable": true,
+    "message": "Trade execution price deviated beyond allowed slippage tolerance",
+    "remedy": "Increase slippage tolerance percentage or trade in smaller tranches"
+  },
+  {
+    "code": 1224,
+    "slug": "ERR_DEX_ORDERBOOK_EMPTY",
+    "category": "DEX",
+    "httpStatus": 404,
+    "retryable": false,
+    "message": "No active bids or asks exist for requested asset pair",
+    "remedy": "Create DEX limit offer or supply AMM liquidity"
+  },
+  {
+    "code": 1225,
+    "slug": "ERR_DEX_POOL_NOT_FOUND",
+    "category": "DEX",
+    "httpStatus": 404,
+    "retryable": false,
+    "message": "Liquidity pool for requested assets does not exist",
+    "remedy": "Query stellar_get_liquidity_pools or initialize pool with initial deposit"
+  },
+  {
+    "code": 1226,
+    "slug": "ERR_DEX_POOL_EMPTY",
+    "category": "DEX",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Liquidity pool has zero reserve balance",
+    "remedy": "Deposit reserves into liquidity pool before executing swaps"
+  },
+  {
+    "code": 1227,
+    "slug": "ERR_DEX_POOL_IMBALANCED",
+    "category": "DEX",
+    "httpStatus": 400,
+    "retryable": true,
+    "message": "Trade would exceed pool imbalance tolerance limit",
+    "remedy": "Reduce swap size relative to pool total reserves"
+  },
+  {
+    "code": 1228,
+    "slug": "ERR_DEX_PRICE_IMPACT_TOO_HIGH",
+    "category": "DEX",
+    "httpStatus": 400,
+    "retryable": true,
+    "message": "Swap size creates unacceptable price impact on pool",
+    "remedy": "Split swap across multiple blocks or route through deeper pools"
+  },
+  {
+    "code": 1229,
+    "slug": "ERR_DEX_OFFER_NOT_FOUND",
+    "category": "DEX",
+    "httpStatus": 404,
+    "retryable": false,
+    "message": "Offer ID does not exist on DEX orderbook",
+    "remedy": "Verify offerId or check if offer was filled or cancelled"
+  },
+  {
+    "code": 1230,
+    "slug": "ERR_DEX_OFFER_CROSS_SELF",
+    "category": "DEX",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Offer would cross an existing offer from same account",
+    "remedy": "Cancel existing opposite offer before creating new order"
+  },
+  {
+    "code": 1231,
+    "slug": "ERR_DEX_OFFER_EXPIRED",
+    "category": "DEX",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Passive offer or time-bounded order has expired",
+    "remedy": "Create a new offer with updated expiration time"
+  },
+  {
+    "code": 1232,
+    "slug": "ERR_DEX_PATH_HOPS_EXCEEDED",
+    "category": "DEX",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Payment path requires more than maximum allowable hops (max 5)",
+    "remedy": "Simplify routing path to 5 or fewer intermediate assets"
+  },
+  {
+    "code": 1233,
+    "slug": "ERR_DEX_ASSET_UNTRADABLE",
+    "category": "DEX",
+    "httpStatus": 403,
+    "retryable": false,
+    "message": "One or more assets in path are frozen or revoked by issuer",
+    "remedy": "Select alternative routing asset with unrestricted trading"
+  },
+  {
+    "code": 1234,
+    "slug": "ERR_DEX_FEE_POOL_DEPLETED",
+    "category": "DEX",
+    "httpStatus": 500,
+    "retryable": true,
+    "message": "Insufficient pool shares or fee reserves to complete trade",
+    "remedy": "Retry trade or choose an alternate liquidity pool"
+  },
+  {
+    "code": 1235,
+    "slug": "ERR_DEX_SPREAD_TOO_WIDE",
+    "category": "DEX",
+    "httpStatus": 400,
+    "retryable": true,
+    "message": "Market bid/ask spread is wider than client risk parameters",
+    "remedy": "Use limit order instead of market path payment"
+  },
+  {
+    "code": 1236,
+    "slug": "ERR_DEX_DEPOSIT_RATIO_INVALID",
+    "category": "DEX",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Liquidity deposit does not match current pool reserves ratio",
+    "remedy": "Adjust asset deposit amounts to match current pool price ratio"
+  },
+  {
+    "code": 1237,
+    "slug": "ERR_DEX_WITHDRAW_SHARES_INSUFFICIENT",
+    "category": "DEX",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Account holds fewer pool shares than requested withdrawal",
+    "remedy": "Verify account pool share balance before submitting withdrawal"
+  },
+  {
+    "code": 1238,
+    "slug": "ERR_DEX_SWAP_ROUTING_TIMEOUT",
+    "category": "DEX",
+    "httpStatus": 504,
+    "retryable": true,
+    "message": "Pathfinding algorithm timed out searching orderbooks",
+    "remedy": "Narrow search parameters or specify direct routing pair"
+  },
+  {
+    "code": 1239,
+    "slug": "ERR_DEX_CROSS_ASSET_FAILED",
+    "category": "DEX",
+    "httpStatus": 500,
+    "retryable": true,
+    "message": "Cross-asset strict receive operation failed in Stellar Core",
+    "remedy": "Verify liquidity depth and re-simulate path payment"
+  },
+  {
+    "code": 1240,
+    "slug": "ERR_DEX_INVALID_ASSET_PAIR",
+    "category": "DEX",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Buying and selling assets cannot be identical",
+    "remedy": "Select two distinct assets for swap"
+  },
+  {
+    "code": 1241,
+    "slug": "ERR_DEX_AMOUNT_ZERO",
+    "category": "DEX",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Swap amount or path payment destination amount is zero",
+    "remedy": "Specify a positive non-zero trade amount"
+  },
+  {
+    "code": 1242,
+    "slug": "ERR_DEX_PRICE_BOUND_INVALID",
+    "category": "DEX",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Min or max price ratio is inverted or malformed",
+    "remedy": "Ensure minPrice is less than or equal to maxPrice"
+  },
+  {
+    "code": 1243,
+    "slug": "ERR_DEX_POOL_FEE_TIER_INVALID",
+    "category": "DEX",
+    "httpStatus": 400,
+    "retryable": false,
+    "message": "Requested fee tier not supported for AMM pool (e.g. 30 bps)",
+    "remedy": "Use standard 30 basis points (0.3%) pool fee tier"
+  },
+  {
+    "code": 1244,
+    "slug": "ERR_DEX_LIQUIDITY_FLASH_RISK",
+    "category": "DEX",
+    "httpStatus": 409,
+    "retryable": true,
+    "message": "High volatility or flash loan anomaly detected in pool",
+    "remedy": "Wait for pool reserves to stabilize before executing large swap"
+  },
+  {
+    "code": 1245,
+    "slug": "ERR_DEX_STALE_ORDERBOOK",
+    "category": "DEX",
+    "httpStatus": 400,
+    "retryable": true,
+    "message": "Orderbook snapshot timestamp is older than maximum tolerance",
+    "remedy": "Refresh orderbook state with stellar_get_orderbook before trade"
+  },
+  {
+    "code": 1246,
+    "slug": "ERR_DEX_INSUFFICIENT_LIQUIDITY",
+    "category": "DEX",
+    "httpStatus": 400,
+    "retryable": true,
+    "message": "Combined DEX and AMM liquidity cannot absorb order volume",
+    "remedy": "Execute trade in smaller batches or increase slippage limit"
+  },
+  {
+    "code": 1247,
+    "slug": "ERR_DEX_ORACLE_DEVIATION",
+    "category": "DEX",
+    "httpStatus": 400,
+    "retryable": true,
+    "message": "AMM pool price deviates significantly from trusted oracle price",
+    "remedy": "Verify market fair value before proceeding"
+  },
+  {
+    "code": 1248,
+    "slug": "ERR_DEX_TRADE_REVERTED",
+    "category": "DEX",
+    "httpStatus": 500,
+    "retryable": false,
+    "message": "Stellar Core reverted trade execution during ledger application",
+    "remedy": "Inspect op_result codes in transaction envelope result"
+  },
+  {
+    "code": 1249,
+    "slug": "ERR_DEX_UNKNOWN_ROUTING_ERROR",
+    "category": "DEX",
+    "httpStatus": 500,
+    "retryable": true,
+    "message": "Unclassified DEX pathfinding or pool execution failure",
+    "remedy": "Consult Stellar Core logs for path payment failure diagnosis"
+  }
+] as const;
