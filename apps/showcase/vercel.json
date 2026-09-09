@@ -1,6 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "buildCommand": "pnpm --filter @stellar-mcp/showcase build",
-  "outputDirectory": "apps/showcase/out"
+  "buildCommand": "next build",
+  "outputDirectory": "out",
+  "cleanUrls": true
 }
