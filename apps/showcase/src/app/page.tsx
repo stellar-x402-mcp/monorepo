@@ -65,6 +65,19 @@ export default function Home() {
               Explore MCP Tools
             </a>
             <a
+              href="/docs"
+              style={{
+                padding: '12px 24px',
+                borderRadius: 8,
+                background: 'linear-gradient(135deg, #3e7bfa 0%, #7928ca 100%)',
+                color: '#ffffff',
+                fontSize: 14,
+                fontWeight: 700
+              }}
+            >
+              Read Documentation &rarr;
+            </a>
+            <a
               href="#simulator"
               style={{
                 padding: '12px 24px',
@@ -212,6 +225,26 @@ export default function Home() {
             gap: 16,
             marginTop: 20
           }}>
+            <a
+              href="/docs"
+              style={{
+                backgroundColor: 'rgba(0, 240, 255, 0.05)',
+                border: '1px solid rgba(0, 240, 255, 0.3)',
+                borderRadius: 8,
+                padding: 16,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 6
+              }}
+            >
+              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent-cyan)' }}>
+                Official Documentation Portal &rarr;
+              </span>
+              <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+                26 guides across 7 payment modalities, gas benchmarks, and error registry
+              </span>
+            </a>
+
             <a
               href="https://github.com/stellar-x402-mcp/monorepo"
               target="_blank"
