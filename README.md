@@ -4,7 +4,7 @@
 [![Vercel Deployment](https://img.shields.io/badge/Vercel-Showcase_Portal-black?logo=vercel)](https://stellar-x402-mcp.vercel.app)
 [![Stellar Testnet](https://img.shields.io/badge/Stellar-Testnet_Deployed-3e7bfa?logo=stellar)](https://stellar.expert/explorer/testnet/contract/CDAVUNF5DHX2MWF33XDMY7WKVBSQZ3SXZDT2TPSNZPEB3Z4HHPPKTVGY)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/Vitest-113_Passing-success.svg)](packages/)
+[![Tests](https://img.shields.io/badge/Vitest-124_Passing-success.svg)](packages/)
 [![Documentation](https://img.shields.io/badge/Docs-Mintlify-18e394?logo=mintlify)](https://github.com/stellar-x402-mcp/docs)
 
 Model Context Protocol (MCP) server, institutional developer tooling system, and multi-payment settlement framework for Stellar and Soroban.
@@ -24,7 +24,7 @@ For evaluators, reviewers, and grant administrators:
 | **Interactive Showcase (Vercel)** | [stellar-x402-mcp.vercel.app](https://stellar-x402-mcp.vercel.app) | Live tool runner, x402 simulator, and error registry |
 | **Testnet Contract (Stellar.expert)** | [stellar.expert/testnet/contract/...](https://stellar.expert/explorer/testnet/contract/CDAVUNF5DHX2MWF33XDMY7WKVBSQZ3SXZDT2TPSNZPEB3Z4HHPPKTVGY) | Verified state channel contract and upload transactions |
 | **Stellar Laboratory (Testnet)** | [lab.stellar.org/testnet/contract/...](https://lab.stellar.org/r/testnet/contract/CDAVUNF5DHX2MWF33XDMY7WKVBSQZ3SXZDT2TPSNZPEB3Z4HHPPKTVGY) | Live Soroban RPC contract inspection harness |
-| **Planning & Architecture Records** | [github.com/EmeditWeb/stellar-agentic-planning](https://github.com/EmeditWeb/stellar-agentic-planning) | ADR-001 through ADR-012 and complete roadmap |
+| **Planning & Architecture Records** | [github.com/EmeditWeb/stellar-agentic-planning](https://github.com/EmeditWeb/stellar-agentic-planning) | ADR-001 through ADR-014 and complete roadmap |
 | **Gas Benchmarks** | [contracts/x402_channel/BENCHMARKS.md](contracts/x402_channel/BENCHMARKS.md) | Profiled CPU instructions, memory bytes, and savings |
 | **250 Error Codes Registry** | [packages/paywall/src/errors/](packages/paywall/src/errors/) | Exhaustive machine-readable error classification |
 
@@ -247,6 +247,15 @@ stellar-mcp benchmark
 
 ---
 
+## Reference Applications (`apps/`)
+
+Production-ready reference implementations illustrating monetization and consumption patterns:
+
+1. **`apps/showcase`**: Interactive Next.js 16 developer playground deployed to Vercel with live Horizon/Soroban tool execution, 402 challenge simulator, and 250 error code directory.
+2. **`apps/paywalled-oracle`**: Standalone reference MCP server monetizing real-time DEX price discovery, Soroban TVL, and optimal swap routing, protected by `@stellar-mcp/paywall` with USDC micropayments.
+
+---
+
 ## Open Source Tooling Governance
 
 Designed to accommodate 100+ community issues, contributors, and tooling extensions:
@@ -262,7 +271,7 @@ Designed to accommodate 100+ community issues, contributors, and tooling extensi
 # Install dependencies across all workspaces
 pnpm install
 
-# Run 113 tests across all packages
+# Run 124 tests across all packages and reference apps
 pnpm test
 
 # Typecheck with strict TypeScript and exactOptionalPropertyTypes
