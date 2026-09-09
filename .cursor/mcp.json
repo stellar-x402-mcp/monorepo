@@ -1,8 +1,18 @@
 {
   "mcpServers": {
-    "stellar": {
+    "stellar-mcp": {
       "command": "node",
-      "args": ["packages/server/dist/index.js"]
+      "args": [
+        "./packages/cli/dist/cli.js",
+        "serve",
+        "--transport",
+        "stdio",
+        "--network",
+        "testnet"
+      ],
+      "env": {
+        "STELLAR_NETWORK": "testnet"
+      }
     }
   }
 }

@@ -1,8 +1,21 @@
 {
   "mcpServers": {
-    "stellar": {
+    "stellar-x402": {
       "command": "npx",
-      "args": ["-y", "@stellar-mcp/server", "--network", "testnet"]
+      "args": [
+        "-y",
+        "@stellar-mcp/cli",
+        "serve",
+        "--transport",
+        "stdio",
+        "--network",
+        "testnet"
+      ],
+      "env": {
+        "STELLAR_NETWORK": "testnet",
+        "STELLAR_HORIZON_URL": "https://horizon-testnet.stellar.org",
+        "STELLAR_SOROBAN_RPC_URL": "https://soroban-testnet.stellar.org"
+      }
     }
   }
 }

@@ -1,0 +1,14 @@
+services:
+  stellar-mcp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["serve", "--transport", "sse", "--port", "3000", "--network", "testnet"]
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - STELLAR_NETWORK=testnet
+      - STELLAR_HORIZON_URL=https://horizon-testnet.stellar.org
+      - STELLAR_SOROBAN_RPC_URL=https://soroban-testnet.stellar.org
+    restart: unless-stopped
