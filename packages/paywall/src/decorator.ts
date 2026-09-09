@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { formatErrorPayload, StandardErrorPayload } from './errors/index.js';
 
 export const X402ToolConfigSchema = z.object({
   price: z.string().min(1).describe('Price in token units (e.g. "0.005")'),
@@ -18,11 +19,13 @@ export type X402ToolConfig<TArgs = any, TResult = any> = {
 
 export class PaymentRequiredError extends Error {
   public challenge: any;
+  public standardError: StandardErrorPayload;
 
   constructor(challenge: any) {
     super('Payment Required: This MCP tool requires x402 payment settled on Stellar');
     this.name = 'PaymentRequiredError';
     this.challenge = challenge;
+    this.standardError = formatErrorPayload(1120, { challenge });
   }
 }
 

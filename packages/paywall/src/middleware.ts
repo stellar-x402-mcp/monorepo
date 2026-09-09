@@ -2,6 +2,7 @@ import { OnChainTransactionVerifier, VerificationResult } from './verifier.js';
 import { ReplayProtector } from './replay.js';
 import { PaymentChallengeGenerator, PaymentChallenge } from './challenge.js';
 import { DynamicPricingEngine, PricingContext } from './pricing.js';
+import { formatErrorPayload } from './errors/index.js';
 
 export interface X402MiddlewareOptions {
   recipient: string;
@@ -90,6 +91,7 @@ export function x402Express(options: X402MiddlewareOptions) {
         error: 'Payment Required',
         message: 'This endpoint requires an HTTP 402 micro-payment settled on Stellar',
         challenge,
+        standardError: formatErrorPayload(1120, { challenge }),
       });
     }
 
@@ -99,6 +101,7 @@ export function x402Express(options: X402MiddlewareOptions) {
       return res.status(402).json({
         error: 'Payment Replay Detected',
         message: claimRes.error,
+        standardError: formatErrorPayload(1160, { detail: claimRes.error }),
       });
     }
 
@@ -121,6 +124,7 @@ export function x402Express(options: X402MiddlewareOptions) {
       return res.status(402).json({
         error: 'Invalid Payment',
         message: verifyResult.error,
+        standardError: formatErrorPayload(1129, { detail: verifyResult.error }),
       });
     }
 
@@ -175,6 +179,7 @@ export function x402Fastify(options: X402MiddlewareOptions) {
         error: 'Payment Required',
         message: 'This endpoint requires an HTTP 402 micro-payment settled on Stellar',
         challenge,
+        standardError: formatErrorPayload(1120, { challenge }),
       });
     }
 
@@ -184,6 +189,7 @@ export function x402Fastify(options: X402MiddlewareOptions) {
       return reply.code(402).send({
         error: 'Payment Replay Detected',
         message: claimRes.error,
+        standardError: formatErrorPayload(1160, { detail: claimRes.error }),
       });
     }
 
@@ -206,6 +212,7 @@ export function x402Fastify(options: X402MiddlewareOptions) {
       return reply.code(402).send({
         error: 'Invalid Payment',
         message: verifyResult.error,
+        standardError: formatErrorPayload(1129, { detail: verifyResult.error }),
       });
     }
 
@@ -271,6 +278,7 @@ export function x402Hono(options: X402MiddlewareOptions) {
           error: 'Payment Required',
           message: 'This endpoint requires an HTTP 402 micro-payment settled on Stellar',
           challenge,
+          standardError: formatErrorPayload(1120, { challenge }),
         },
         402
       );
@@ -283,6 +291,7 @@ export function x402Hono(options: X402MiddlewareOptions) {
         {
           error: 'Payment Replay Detected',
           message: claimRes.error,
+          standardError: formatErrorPayload(1160, { detail: claimRes.error }),
         },
         402
       );
@@ -308,6 +317,7 @@ export function x402Hono(options: X402MiddlewareOptions) {
         {
           error: 'Invalid Payment',
           message: verifyResult.error,
+          standardError: formatErrorPayload(1129, { detail: verifyResult.error }),
         },
         402
       );
