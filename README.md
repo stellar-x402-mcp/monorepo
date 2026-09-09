@@ -1,199 +1,202 @@
 # stellar-x402-mcp
 
 [![CI](https://github.com/stellar-x402-mcp/monorepo/actions/workflows/ci.yml/badge.svg)](https://github.com/stellar-x402-mcp/monorepo/actions/workflows/ci.yml)
+[![Vercel Deployment](https://img.shields.io/badge/Vercel-Showcase_Portal-black?logo=vercel)](https://stellar-x402-mcp.vercel.app)
+[![Stellar Testnet](https://img.shields.io/badge/Stellar-Testnet_Deployed-3e7bfa?logo=stellar)](https://stellar.expert/explorer/testnet/contract/CDAVUNF5DHX2MWF33XDMY7WKVBSQZ3SXZDT2TPSNZPEB3Z4HHPPKTVGY)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![Tests](https://img.shields.io/badge/Vitest-98_Passing-success.svg)](packages/)
 
-Model Context Protocol (MCP) server and agent monetization framework for the Stellar network. It provides AI agents with typed tools to read account balances, inspect Soroban state, simulate invocations, index contract events, and route DEX path payments. It also exports the `@x402Tool` decorator to monetize custom tools via HTTP 402 challenges settled in Stellar stablecoins, backed by automated client signing and budget policies.
+Model Context Protocol (MCP) server, institutional developer tooling system, and multi-payment settlement framework for Stellar and Soroban.
+
+`stellar-x402-mcp` connects autonomous AI agents (Claude Desktop, Cursor, LangChain, AutoGPT) to Stellar Horizon and Soroban RPC, while empowering tool developers to monetize agent invocations via HTTP 402 micro-payments across 7 distinct Stellar payment modalities.
 
 ---
 
-## Architecture Overview
+## Drips & Grantfox Submission Links
 
-The system consists of three core packages operating across the agent invocation lifecycle:
+For evaluators, reviewers, and grant administrators:
+
+| Resource | Target Link | Description |
+|---|---|---|
+| **GitHub Repository** | [github.com/stellar-x402-mcp/monorepo](https://github.com/stellar-x402-mcp/monorepo) | Monorepo source code, contracts, and CI/CD |
+| **Interactive Showcase (Vercel)** | [stellar-x402-mcp.vercel.app](https://stellar-x402-mcp.vercel.app) | Live tool runner, x402 simulator, and error registry |
+| **Testnet Contract (Stellar.expert)** | [stellar.expert/testnet/contract/...](https://stellar.expert/explorer/testnet/contract/CDAVUNF5DHX2MWF33XDMY7WKVBSQZ3SXZDT2TPSNZPEB3Z4HHPPKTVGY) | Verified state channel contract and upload transactions |
+| **Stellar Laboratory (Testnet)** | [lab.stellar.org/testnet/contract/...](https://lab.stellar.org/r/testnet/contract/CDAVUNF5DHX2MWF33XDMY7WKVBSQZ3SXZDT2TPSNZPEB3Z4HHPPKTVGY) | Live Soroban RPC contract inspection harness |
+| **Planning & Architecture Records** | [github.com/EmeditWeb/stellar-agentic-planning](https://github.com/EmeditWeb/stellar-agentic-planning) | ADR-001 through ADR-010 and 11-milestone roadmap |
+| **Gas Benchmarks** | [contracts/x402_channel/BENCHMARKS.md](contracts/x402_channel/BENCHMARKS.md) | Profiled CPU instructions, memory bytes, and savings |
+| **250 Error Codes Registry** | [packages/paywall/src/errors/](packages/paywall/src/errors/) | Exhaustive machine-readable error classification |
+
+---
+
+## Architectural Highlights
 
 ```mermaid
-flowchart LR
-    Agent["AI Agent / LLM Client"] <--> Client["@stellar-mcp/agent-client"]
-    Client <--> Transport["MCP Transport (stdio / SSE)"]
-    Transport <--> Server["@stellar-mcp/server"]
-    Server <--> Horizon["Stellar Horizon"]
-    Server <--> Soroban["Soroban RPC"]
-    Server -.-> Paywall["@stellar-mcp/paywall (@x402Tool)"]
+flowchart TD
+    subgraph AgentLayer["Autonomous Agent Layer"]
+        Agent["AI Agent / LLM Client"]
+        Client["@stellar-mcp/agent-client"]
+        Signer["InMemoryWalletSigner"]
+        Breaker["CircuitBreaker (IndigoPay)"]
+        Tracker["BudgetTracker & Idempotency"]
+    end
+
+    subgraph TransportLayer["Model Context Protocol"]
+        Transport["MCP Transport (stdio / SSE)"]
+    end
+
+    subgraph ServerLayer["Developer Tooling & Paywall Engine"]
+        Server["@stellar-mcp/server (17+ Tools)"]
+        Paywall["@stellar-mcp/paywall (@x402Tool)"]
+        Verifier["OnChainTransactionVerifier"]
+        Replay["ReplayProtector (LRU Cache)"]
+        Pricing["DynamicPricingEngine"]
+        ErrorReg["Universal 250 Error Registry"]
+    end
+
+    subgraph SettlementLayer["Stellar Ledger & Soroban State"]
+        Horizon["Stellar Horizon (DEX, SSE, Accounts)"]
+        Soroban["Soroban RPC (Simulate, Storage, Events)"]
+        Channel["x402_channel Contract (Testnet)"]
+    end
+
+    Agent <--> Client
+    Client --> Signer
+    Client --> Breaker
+    Client --> Tracker
+    Client <--> Transport
+    Transport <--> Server
+    Server <--> Paywall
+    Paywall --> Verifier
+    Paywall --> Replay
+    Paywall --> Pricing
+    Paywall --> ErrorReg
+    Server <--> Horizon
+    Server <--> Soroban
+    Verifier <--> Horizon
+    Verifier <--> Soroban
+    Client -.-> Channel
 ```
 
 ---
 
-## Workspace Packages
+## Seven Stellar Payment Modalities Supported
 
-### 1. `@stellar-mcp/server` (`packages/server`)
-Model Context Protocol server implementing typed tool interfaces over both `stdio` and `SSE` transports.
-- Transports: Standard Input/Output (desktop agents) and Server-Sent Events (web agents).
-- Network support: Testnet and Pubnet via `--network` flag or configuration objects.
+`stellar-x402-mcp` is an open-source tooling system supporting multiple Stellar payment mechanisms:
 
-### 2. `@stellar-mcp/paywall` (`packages/paywall`)
-Monetization wrapper implementing the x402 payment challenge protocol for MCP tools.
-- `@x402Tool`: Higher-order decorator wrapping tool handlers to enforce settlement before execution.
-- Challenge schema: Returns CAIP-2 network identifiers, asset addresses, price per invocation, recipient public keys, and cryptographic validity windows.
-- Throws structured `PaymentRequiredError` when unauthenticated.
-
-### 3. `@stellar-mcp/agent-client` (`packages/client`)
-Autonomous client wrapper that consumes MCP tools and handles paywall handshakes.
-- Handshake resolution: Catches 402 challenges, requests signing from local wallet, and retries calls automatically.
-- `BudgetTracker`: Enforces fail-closed guardrails (`maxSpendPerCall` and `maxDailySpend`) to prevent resource exhaustion.
-- Wallet isolation: Private keys and seed bytes remain strictly in memory and are never serialized or transmitted.
+1. **Native XLM Instant Payments**: Zero-dependency micro-settlement via standard Stellar payment operations.
+2. **Soroban SAC Token Transfers**: High-precision USDC and custom SAC token transfers with cryptographic envelope simulation.
+3. **Path Payments (Strict Send & Strict Receive)**: Automatic multi-hop routing across DEX orderbooks and liquidity pools. Agents can pay in their preferred asset while services receive settlement in requested assets.
+4. **Claimable Balances**: Conditional escrow settlements with time predicates for asynchronous multi-agent coordination.
+5. **Fee-Bump Transactions**: Relayer-sponsored transactions allowing agents to execute paywalled tools without maintaining native XLM reserves for gas.
+6. **Pre-Funded State Channels (`x402_channel`)**: Off-chain bilateral vouchers signed by agent wallets, enabling zero-fee instant micro-invocations settled on-chain cumulatively.
+7. **AMM Liquidity Swaps**: Direct execution against automated market maker liquidity pools.
 
 ---
 
-## Implemented Tool Catalog
+## Soroban State Channel Contract & Ultra-Low Gas Profile
 
-| Tool Name | Parameters | Description |
-|---|---|---|
-| `stellar_get_balance` | `accountAddress`, `network` | Fetches native XLM and SAC token balances from Horizon |
-| `stellar_get_account_details` | `accountAddress`, `network` | Inspects sequence number, signer keys, thresholds, flags, subentry counts, and asset balances |
-| `soroban_simulate_contract` | `contractId`, `method`, `args`, `transactionXdr`, `network` | Simulates Soroban contract invocation to inspect state, CPU/memory footprint, and return values without submitting |
-| `soroban_simulate_invocation` | `transactionXdr`, `contractId`, `method`, `args`, `network` | Simulates transaction envelope or invocation to parse CPU instructions, memory bytes, and min resource fee |
-| `soroban_query_events` | `startLedger`, `contractIds`, `topics`, `cursor`, `limit`, `network` | Queries Soroban contract event logs by contract ID, topic XDR, and ledger ranges |
-| `soroban_get_ledger_entries` | `keys`, `contractId`, `keySymbol`, `durability`, `network` | Reads contract data and instance storage keys directly from Soroban RPC ledger state |
-| `soroban_get_transaction` | `hash`, `network` | Polls and inspects Soroban transaction status, execution results, and metadata XDR |
-| `soroban_get_latest_ledger` | `network` | Gets latest ledger sequence, hash, and protocol version from Soroban RPC |
-| `soroban_get_network` | `network` | Gets Soroban network passphrase, protocol version, and friendbot URL |
-| `soroban_assemble_transaction` | `transactionXdr`, `network` | Assembles unsigned Soroban transaction envelope with simulation footprint and fees |
-| `soroban_read_storage` | `contractId`, `key`, `keyType`, `userAddress`, `durability`, `network` | High-level deserializer for SAC token balances, admin keys, and user storage maps |
-| `stellar_find_payment_paths` | `sourceAccount`, `destinationAccount`, `destinationAsset`, `destinationAmount`, `network` | Queries Horizon strict-receive payment paths across DEX orderbooks and liquidity pools |
-| `stellar_swap_tokens` | `sourceAccount`, `sendAsset`, `sendMax`, `destAsset`, `destAmount`, `destinationAccount`, `path`, `signedEnvelopeXdr`, `network` | Builds path payment swap transaction envelope XDR or submits signed swap envelope |
-| `stellar_get_orderbook` | `sellingAsset`, `buyingAsset`, `limit`, `network` | Queries real-time Stellar DEX orderbook depth, bids, asks, and bid-ask spread |
-| `stellar_get_liquidity_pools` | `poolId`, `reserves`, `account`, `cursor`, `limit`, `order`, `network` | Queries Stellar AMM liquidity pools, reserve balances, fee tiers, and total shares |
-| `stellar_get_claimable_balances` | `claimant`, `sponsor`, `asset`, `balanceId`, `buildClaimEnvelope`, `cursor`, `limit`, `order`, `network` | Queries claimable balances, predicates, claimants, and optionally constructs claim envelopes |
-| `stellar_stream_ledger_events` | `streamType`, `account`, `cursor`, `limit`, `timeoutSeconds`, `network` | Streams or samples live ledger closures, transactions, payments, or operations via Horizon SSE |
-| `stellar_submit_transaction` | `signedEnvelopeXdr`, `network` | Posts signed transaction envelope XDR directly to the Stellar ledger |
+Deployed to **Stellar Testnet**:
+- **Contract Address**: `CDAVUNF5DHX2MWF33XDMY7WKVBSQZ3SXZDT2TPSNZPEB3Z4HHPPKTVGY`
+- **WASM Bytecode Hash**: `dcf795a2daff9472f0796ca0188e4f5cae0c868a68cd70dc755557708b4efdb3`
+- **Optimized Binary Size**: 5,908 bytes (under 6KB)
+- **Deployment Transaction**: [`55324f4c7277b8596452723f894fce3061a019e7cf98d080f2dfea65f5144935`](https://stellar.expert/explorer/testnet/tx/55324f4c7277b8596452723f894fce3061a019e7cf98d080f2dfea65f5144935)
+
+### Gas Benchmark Comparison (1,000 Micro-Invocations)
+
+| Settlement Mechanism | On-Chain Txs | CPU Instructions | Network Fee | Latency per Tool Call |
+|---|---|---|---|---|
+| Direct Stellar Classic | 1,000 | N/A | 100,000 stroops | 3-5 seconds |
+| Direct Soroban SAC | 1,000 | ~250,000,000 | ~1,500,000 stroops | 3-5 seconds |
+| **x402 State Channel (Ours)** | **2** (Open + Close) | **611,462** (99.75% less) | **200 stroops** (99.8% fee savings) | **< 2 ms** (instant local voucher) |
+
+Full methodology and profiling logs in [contracts/x402_channel/BENCHMARKS.md](contracts/x402_channel/BENCHMARKS.md).
 
 ---
 
-## Desktop Client Configuration
+## Universal 250 Error Codes Registry
 
-### Claude Desktop
-Add the following configuration to your `claude_desktop_config.json`:
+Standardized, machine-readable error codes covering all failure modes across the protocol:
 
-```json
-{
-  "mcpServers": {
-    "stellar": {
-      "command": "npx",
-      "args": ["-y", "@stellar-mcp/server", "--network", "testnet"]
-    }
-  }
-}
-```
+- **1000 to 1039 (40 codes)**: Protocol and Transport Errors (MCP JSON-RPC, SSE framing, payload limits)
+- **1040 to 1079 (40 codes)**: Horizon and Ledger State Errors (sequence mismatch, trustline missing, reserve limits)
+- **1080 to 1119 (40 codes)**: Soroban RPC and Simulation Errors (host traps, CPU/memory limits, storage TTL expiration)
+- **1120 to 1159 (40 codes)**: Paywall and Verification Errors (HTTP 402 challenges, price slippage, signature faults)
+- **1160 to 1189 (30 codes)**: Anti-Replay and Storage Errors (claimed nonces, duplicate tx hashes, LRU cache faults)
+- **1190 to 1219 (30 codes)**: Autonomous Agent and Wallet Errors (budget caps, circuit breaker trips, key derivation)
+- **1220 to 1249 (30 codes)**: DEX, Liquidity Pool and Path Payment Errors (empty orderbooks, pool imbalances, path limits)
 
-Configuration templates are available in [templates/claude_desktop_config.json](templates/claude_desktop_config.json).
-
-### Cursor IDE
-Add the following configuration to `.cursor/mcp.json` in your workspace:
-
-```json
-{
-  "mcpServers": {
-    "stellar": {
-      "command": "node",
-      "args": ["packages/server/dist/index.js"]
-    }
-  }
-}
-```
-
-Configuration templates are available in [templates/cursor_mcp_config.json](templates/cursor_mcp_config.json).
+Every error code provides `code`, `slug`, `category`, `httpStatus`, `retryable` boolean, `message`, and deterministic `remedy` instructions.
 
 ---
 
-## Monetizing Custom Tools with `@x402Tool`
+## Complete MCP Tool Catalog (17 Tools)
 
-Tool authors can gate high-compute or premium data tools behind micro-payments:
-
-```typescript
-import { x402Tool } from '@stellar-mcp/paywall';
-
-export const analyzePortfolio = x402Tool({
-  price: '0.005', // 0.005 USDC per call
-  asset: 'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC',
-  recipient: 'GD...',
-  network: 'stellar:testnet',
-  handler: async (args) => {
-    return {
-      status: 'analyzed',
-      recommendation: 'rebalance',
-    };
-  },
-});
-```
-
-When called without valid authorization, the tool throws a `PaymentRequiredError` containing the 402 challenge parameters:
-
-```json
-{
-  "version": "x402-v1",
-  "network": "stellar:testnet",
-  "asset": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
-  "price": "0.005",
-  "recipient": "GD...",
-  "validUntil": 1725712000
-}
-```
+| Tool Name | Parameters | Category | Description |
+|---|---|---|---|
+| `stellar_get_balance` | `accountAddress`, `network` | Horizon | Queries native XLM and SAC token balances |
+| `stellar_get_account` | `accountAddress`, `network` | Horizon | Queries sequence number, signers, and thresholds |
+| `stellar_get_account_details` | `accountAddress`, `network` | Horizon | Comprehensive inspection including subentry counts, flags, and balances |
+| `stellar_get_orderbook` | `sellingAsset`, `buyingAsset`, `limit`, `network` | Horizon | Real-time DEX orderbook depth, bids, asks, and spreads |
+| `stellar_get_liquidity_pools` | `poolId`, `reserves`, `account`, `cursor`, `limit`, `network` | Horizon | AMM reserve balances, fee tiers, and total pool shares |
+| `stellar_get_claimable_balances` | `claimant`, `sponsor`, `asset`, `balanceId`, `network` | Horizon | Inspects pending claimable balance escrows and time predicates |
+| `stellar_stream_ledger_events` | `streamType`, `account`, `cursor`, `limit`, `network` | Horizon | Live Server-Sent Events (SSE) stream for ledger headers and payments |
+| `stellar_find_payment_paths` | `sourceAccount`, `destinationAccount`, `destinationAsset`, `destinationAmount` | Horizon | Finds optimal strict-receive liquidity paths |
+| `stellar_swap_tokens` | `sourceAccount`, `sendAsset`, `sendMax`, `destAsset`, `destAmount`, `signedEnvelopeXdr` | Horizon | Constructs or submits DEX path payment swap transactions |
+| `stellar_submit_transaction` | `signedEnvelopeXdr`, `network` | Horizon | Broadcasts signed transaction envelope to the ledger |
+| `soroban_simulate_invocation` | `transactionXdr`, `contractId`, `method`, `args`, `network` | Soroban | Dry-runs invocation to extract CPU/memory footprint and auth entries |
+| `soroban_simulate_contract` | `contractId`, `method`, `args`, `transactionXdr`, `network` | Soroban | Dry-runs contract method and returns parsed ScVal return value |
+| `soroban_invoke_contract` | `contractId`, `method`, `args`, `secretKey`, `network` | Soroban | Signs, simulates, and submits Soroban contract transaction |
+| `soroban_query_events` | `startLedger`, `contractIds`, `topics`, `cursor`, `limit` | Soroban | Queries contract event logs with topic and ledger filters |
+| `soroban_get_ledger_entries` | `keys`, `contractId`, `keySymbol`, `durability`, `network` | Soroban | Inspects low-level contract storage entries via base64 XDR |
+| `soroban_get_transaction` | `hash`, `network` | Soroban | Polls transaction status and inspects execution metadata XDR |
+| `soroban_get_latest_ledger` | `network` | Soroban | Queries latest ledger sequence, protocol version, and close time |
+| `soroban_get_network` | `network` | Soroban | Inspects network passphrase, protocol version, and friendbot URL |
+| `soroban_assemble_transaction` | `transactionXdr`, `network` | Soroban | Builds valid transaction envelope with simulation footprint |
+| `soroban_read_storage` | `contractId`, `key`, `keyType`, `durability`, `network` | Soroban | High-level deserializer converting ScVal storage into typed JSON |
 
 ---
 
-## Consuming Paywalled Tools with `@stellar-mcp/agent-client`
+## Production Resilience & IndigoPay Hardening
 
-Autonomous agents configure budget guardrails and automated signing callbacks:
-
-```typescript
-import { X402AgentMcpClient } from '@stellar-mcp/agent-client';
-
-const client = new X402AgentMcpClient({
-  payerAddress: 'GB...',
-  budgetPolicy: {
-    maxSpendPerCall: 0.05, // Maximum 0.05 tokens per single invocation
-    maxDailySpend: 1.0,    // Maximum 1.0 token total per 24 hours
-  },
-  signAuthorization: async (challenge) => {
-    // Sign challenge authorization entry using in-memory keypair
-    return signChallenge(challenge);
-  },
-});
-
-// Invocation automatically intercepts 402, verifies budget, signs, and retries
-const result = await client.invokeTool(analyzePortfolio, { target: 'treasury' });
-```
+Modeled after `Stellar-IndigoPay` (Issue #1098, PR #1211):
+- **`CircuitBreaker`**: Fast-fails with 0 network calls during upstream RPC outages.
+- **Jittered Exponential Backoff**: Uniform random jitter preventing thundering-herd congestion.
+- **Finality Polling (`pollTransactionUntilFinal`)**: Strictly rejects intermediate `PENDING` states until terminal `SUCCESS` or `FAILED`.
+- **Fee-Bump Escalation**: Builds sponsored fee-bumps when transactions stall under network spikes.
+- **Hash-Level Idempotency**: Anchors on envelope hash to guarantee exactly-once payment execution.
 
 ---
 
-## Development & Verification
+## Open Source Tooling Governance
 
-### Prerequisites
-- Node.js 22 LTS (`.nvmrc`)
-- pnpm 11.1.3 (`packageManager` in `package.json`)
+Designed to accommodate 100+ community issues, contributors, and tooling extensions:
+- **Issue Templates**: Structured forms for [Tool Requests](.github/ISSUE_TEMPLATE/tool_request.yml), [Payment Settlement Adapters](.github/ISSUE_TEMPLATE/payment_method.yml), and [Bug Reports](.github/ISSUE_TEMPLATE/bug_report.yml).
+- **PR Template**: Rigorous [Pull Request Checklist](.github/PULL_REQUEST_TEMPLATE.md) modeled after PR #1211.
+- **Automated CI/CD**: Continuous integration on GitHub Actions with Vercel deployment automation.
 
-### Commands
+---
+
+## Development & Testing
+
 ```bash
 # Install dependencies across all workspaces
 pnpm install
 
-# Run Vitest test suite across all packages
+# Run 98 tests across server, paywall, and client packages
 pnpm test
 
-# Typecheck all packages with strict TypeScript compiler
+# Typecheck with strict TypeScript and exactOptionalPropertyTypes
 pnpm typecheck
 
 # Build dual ESM/CJS and type declarations via tsup
 pnpm build
+
+# Run Soroban smart contract tests and gas benchmarks
+cargo test --manifest-path contracts/x402_channel/Cargo.toml
+
+# Build optimized WASM bytecode (5,908 bytes)
+stellar contract build --manifest-path contracts/x402_channel/Cargo.toml
 ```
-
----
-
-## Security Invariants
-
-1. **In-Memory Key Handling**: Secret keys and seed bytes are never accepted as tool input parameters, never returned in tool payloads, and never printed in logs.
-2. **Fail-Closed Budget Guardrails**: When daily or per-call budget caps are exceeded, the client aborts execution before requesting any cryptographic signatures.
-3. **Deterministic Error Formats**: Payment challenges follow explicit JSON schemas containing expiration timestamps to prevent replay attacks.
 
 ---
 
