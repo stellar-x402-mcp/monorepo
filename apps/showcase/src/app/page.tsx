@@ -311,7 +311,7 @@ export default function Home() {
         color: 'var(--text-secondary)',
         backgroundColor: 'var(--bg-secondary)'
       }}>
-        stellar-x402-mcp &copy; 2026. Open source developer tooling built for the Stellar Community Fund, Grantfox, and Drips.
+        stellar-x402-mcp &copy; 2026. Open source developer tooling built for the Stellar Blockchain
       </footer>
     </div>
   );

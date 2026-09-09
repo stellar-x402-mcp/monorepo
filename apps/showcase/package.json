@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && mkdir -p apps/showcase && cp -r .next apps/showcase/out && cp -r .next out",
+    "build": "next build && node scripts/sync_outputs.cjs",
     "start": "next start",
     "typecheck": "tsc --noEmit"
   },
