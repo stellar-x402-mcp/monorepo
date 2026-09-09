@@ -1,0 +1,32 @@
+{
+  "name": "@stellar-mcp/trading-agent",
+  "version": "0.1.0",
+  "description": "Autonomous AI trading agent consuming paywalled MCP oracle feeds with auto-settlement, daily budget caps, and DEX swap execution",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "@stellar-mcp/agent-client": "workspace:*",
+    "@stellar-mcp/paywall": "workspace:*",
+    "@stellar-mcp/server": "workspace:*",
+    "chalk": "^5.3.0",
+    "dotenv": "^16.4.5",
+    "zod": "^3.23.8"
+  },
+  "peerDependencies": {
+    "@stellar/stellar-sdk": ">=16.2.0 <17.0.0"
+  },
+  "devDependencies": {
+    "@stellar/stellar-sdk": "16.2.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.9.2",
+    "vitest": "^2.1.4"
+  }
+}
