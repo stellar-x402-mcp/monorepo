@@ -9,6 +9,10 @@ jobs:
   deploy:
     name: Deploy to Vercel
     runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -27,11 +31,17 @@ jobs:
       - name: Build Showcase Web App
         run: pnpm --filter @stellar-mcp/showcase build
 
+      - name: Check Vercel Credentials
+        run: |
+          if [ -z "${VERCEL_TOKEN}" ]; then
+            echo "::warning ::VERCEL_TOKEN secret is not set in GitHub repository secrets. Skipping automated deployment to Vercel."
+          else
+            echo "VERCEL_TOKEN detected. Proceeding with deployment."
+          fi
+
       - name: Deploy to Vercel Production
         uses: amondnet/vercel-action@v25
         if: env.VERCEL_TOKEN != ''
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
