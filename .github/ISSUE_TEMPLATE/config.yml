@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Stellar Community Discussions
+    url: https://discord.gg/stellar
+    about: Ask questions and discuss with the Stellar developer community
+  - name: Interactive Showcase & Error Directory
+    url: https://github.com/stellar-x402-mcp/monorepo
+    about: Test MCP tools and query the 250 error code registry

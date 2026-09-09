@@ -1,0 +1,52 @@
+name: MCP Tool Request
+description: Propose a new Stellar Horizon or Soroban RPC tool for AI agents
+title: "feat(tool): add <tool_name>"
+labels: ["enhancement", "tool-request", "tooling-system"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for proposing a new tool for the `stellar-x402-mcp` developer tooling system!
+  - type: input
+    id: tool_name
+    attributes:
+      label: Tool Name
+      description: Use the standard prefix `stellar_` (Horizon) or `soroban_` (RPC).
+      placeholder: e.g. stellar_get_strict_send_paths
+    validations:
+      required: true
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Problem & Agent Use Case
+      description: Explain what autonomous capability this tool unlocks for AI agents.
+      placeholder: e.g. AI agents need to query liquidity paths when sending an exact amount of an input asset...
+    validations:
+      required: true
+  - type: textarea
+    id: input_schema
+    attributes:
+      label: Proposed Input Schema (Zod / JSON Schema)
+      description: Specify the expected input parameters and validation rules.
+      render: typescript
+    validations:
+      required: true
+  - type: textarea
+    id: output_structure
+    attributes:
+      label: Expected Output Structure
+      description: Describe the JSON payload returned to the agent.
+      render: json
+    validations:
+      required: true
+  - type: dropdown
+    id: error_code_block
+    attributes:
+      label: Associated Error Code Block
+      description: Which numerical block of the 250 error code registry does this tool belong to?
+      options:
+        - "1040-1079: Horizon & Ledger State"
+        - "1080-1119: Soroban RPC & Simulation"
+        - "1220-1249: DEX & Liquidity Pools"
+    validations:
+      required: true

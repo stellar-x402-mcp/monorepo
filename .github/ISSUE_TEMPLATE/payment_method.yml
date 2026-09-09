@@ -1,0 +1,30 @@
+name: Payment Settlement Adapter Request
+description: Propose a new payment modality, settlement mechanism, or token standard
+title: "feat(settlement): support <payment_mechanism>"
+labels: ["settlement", "payment-engine", "x402"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Propose a new settlement adapter for the `@stellar-mcp/paywall` and `@stellar-mcp/agent-client` multi-payment framework.
+  - type: input
+    id: method_name
+    attributes:
+      label: Payment Modality Identifier
+      placeholder: e.g. cross_chain_atomic_swap or sac_allowance_pull
+    validations:
+      required: true
+  - type: textarea
+    id: architecture
+    attributes:
+      label: Settlement Flow Architecture
+      description: Describe the interaction between caller, paywall challenge, and ledger verification.
+    validations:
+      required: true
+  - type: textarea
+    id: gas_implications
+    attributes:
+      label: Gas & Transaction Cost Implications
+      description: Estimated CPU instructions, ledger writes, and base fees per settlement.
+    validations:
+      required: true
