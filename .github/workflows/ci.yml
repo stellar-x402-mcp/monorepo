@@ -8,8 +8,12 @@ on:
 
 jobs:
   test:
-    name: Build & Test
+    name: Build & Test (Node ${{ matrix.node-version }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22]
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -17,8 +21,24 @@ jobs:
           version: 11.1.3
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
-      - run: pnpm install --frozen-lockfile=false
-      - run: pnpm build
-      - run: pnpm typecheck
-      - run: pnpm test
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile=false
+      - name: Build Packages & Reference Apps
+        run: pnpm build
+      - name: Strict TypeScript Verification
+        run: pnpm typecheck
+      - name: Execute Full Test Suite (155 Tests)
+        run: pnpm test:all
+
+  contract:
+    name: Soroban Smart Contract Tests & Benchmarks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32v1-none
+      - name: Run Cargo Unit & Benchmark Tests
+        run: cargo test --manifest-path contracts/x402_channel/Cargo.toml
