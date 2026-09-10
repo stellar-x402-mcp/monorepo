@@ -110,12 +110,22 @@ a {
   font-weight: 600;
 }
 
-.token.function,
-.token.class-name {
+.token.function {
   color: #d2a8ff !important;
   font-weight: 500;
 }
 
-.token.variable {
+.token.class-name,
+.token.maybe-class-name {
   color: #ffa657 !important;
+  font-weight: 500;
 }
+
+.token.parameter {
+  color: #e6edf3 !important;
+}
+
+.token.variable {
+  color: #79c0ff !important;
+}
+

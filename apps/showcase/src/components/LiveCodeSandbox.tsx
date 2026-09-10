@@ -1,6 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import Prism from 'prismjs';
+import 'prismjs/components/prism-javascript';
+import 'prismjs/components/prism-typescript';
 
 interface SandboxSnippet {
   id: string;
@@ -150,6 +153,14 @@ export function LiveCodeSandbox() {
 
   const currentSnippet = SNIPPETS.find((s) => s.id === activeTab) || SNIPPETS[0];
 
+  const highlightedLines = useMemo(() => {
+    const grammar = Prism.languages.typescript || Prism.languages.javascript;
+    return currentSnippet.code.split('\n').map((line) => {
+      if (!line.trim()) return '&nbsp;';
+      return Prism.highlight(line, grammar, 'typescript');
+    });
+  }, [currentSnippet.code]);
+
   const handleCopy = () => {
     navigator.clipboard.writeText(currentSnippet.code);
     setCopied(true);
@@ -289,17 +300,40 @@ export function LiveCodeSandbox() {
           </div>
         </div>
 
-        {/* Code Viewer */}
-        <div style={{ padding: 20, backgroundColor: '#0d1117', overflowX: 'auto' }}>
-          <pre style={{
-            margin: 0,
-            fontSize: 13,
-            lineHeight: 1.65,
-            color: '#c9d1d9',
-            fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace'
+        {/* Code Viewer with Line Numbers and Syntax Highlighting */}
+        <div style={{
+          display: 'flex',
+          backgroundColor: '#0d1117',
+          padding: '16px 0',
+          overflowX: 'auto',
+          fontSize: 13,
+          lineHeight: 1.6,
+          fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace'
+        }}>
+          {/* Line Numbers Gutter */}
+          <div style={{
+            userSelect: 'none',
+            padding: '0 16px',
+            textAlign: 'right',
+            color: 'var(--text-muted)',
+            borderRight: '1px solid var(--border)',
+            minWidth: 48
           }}>
-            <code>{currentSnippet.code}</code>
-          </pre>
+            {highlightedLines.map((_, i) => (
+              <div key={i}>{i + 1}</div>
+            ))}
+          </div>
+
+          {/* Syntax Highlighted Lines */}
+          <div style={{ padding: '0 16px', flex: 1, minWidth: 0 }}>
+            {highlightedLines.map((lineHtml, i) => (
+              <div
+                key={i}
+                dangerouslySetInnerHTML={{ __html: lineHtml }}
+                style={{ whiteSpace: 'pre' }}
+              />
+            ))}
+          </div>
         </div>
 
         {/* Live Execution Output Terminal */}
