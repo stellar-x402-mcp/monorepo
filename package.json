@@ -9,11 +9,14 @@
   "scripts": {
     "build": "pnpm -r --filter=\"./packages/*\" build",
     "test": "pnpm -r --filter=\"./packages/*\" test",
+    "test:e2e": "vitest run --config vitest.e2e.config.ts",
+    "test:all": "pnpm test && pnpm --filter @stellar-mcp/paywalled-oracle test && pnpm --filter @stellar-mcp/trading-agent test && pnpm test:e2e",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck"
   },
   "devDependencies": {
     "@types/node": "^22.13.0",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vitest": "^2.1.9"
   }
 }
