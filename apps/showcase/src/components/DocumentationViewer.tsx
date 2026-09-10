@@ -211,10 +211,47 @@ export function DocumentationViewer() {
     setCollapsedGroups({});
   };
 
+  // Auto-expand category accordion for active article
+  useEffect(() => {
+    const art = articles.find((a) => a.slug === selectedSlug);
+    if (art && art.group) {
+      setCollapsedGroups((prev) => ({
+        ...prev,
+        [art.group]: false,
+      }));
+    }
+  }, [selectedSlug, articles]);
+
+  // Sync selected article with URL query param on mount and browser back/forward navigation
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const syncSlugFromUrl = () => {
+        const params = new URLSearchParams(window.location.search);
+        const slugParam = params.get('slug');
+        if (slugParam) {
+          const clean = slugParam.split('#')[0].replace(/^\//, '');
+          if (articles.some((a) => a.slug === clean)) {
+            setSelectedSlug(clean);
+            return;
+          }
+        }
+        const path = window.location.pathname.replace(/^\/docs\/?/, '').replace(/^\//, '');
+        if (path && articles.some((a) => a.slug === path)) {
+          setSelectedSlug(path);
+        }
+      };
+
+      syncSlugFromUrl();
+      window.addEventListener('popstate', syncSlugFromUrl);
+      return () => window.removeEventListener('popstate', syncSlugFromUrl);
+    }
+  }, [articles]);
+
   const handleNavigate = (targetSlug: string) => {
-    const clean = targetSlug.replace(/^\//, '');
+    const clean = targetSlug.replace(/^\//, '').split('#')[0];
     setSelectedSlug(clean);
     if (typeof window !== 'undefined') {
+      window.history.pushState(null, '', `/docs?slug=${clean}`);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
@@ -251,12 +288,45 @@ export function DocumentationViewer() {
       } else if (token.startsWith('[') && token.includes('](')) {
         const linkText = token.slice(1, token.indexOf(']('));
         const linkUrl = token.slice(token.indexOf('](') + 2, -1);
+        const cleanUrl = linkUrl
+          .replace(/^https?:\/\/(stellar-x402-mcp\.vercel\.app|localhost(:\d+)?)/, '');
+        const isExternal = cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://');
+
+        // Check if link is an internal documentation link
+        if (!isExternal) {
+          const rawSlug = cleanUrl.replace(/^\/docs\/?(\?slug=)?/, '').replace(/^\//, '').split('#')[0];
+          const isDocArticle = articles.some((a) => a.slug === rawSlug);
+          if (isDocArticle) {
+            parts.push(
+              <a
+                key={match.index}
+                href={`/docs?slug=${rawSlug}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavigate(rawSlug);
+                }}
+                style={{
+                  color: 'var(--accent-cyan)',
+                  textDecoration: 'underline',
+                  textUnderlineOffset: 3,
+                  cursor: 'pointer',
+                  fontWeight: 500
+                }}
+              >
+                {linkText}
+              </a>
+            );
+            lastIndex = regex.lastIndex;
+            continue;
+          }
+        }
+
         parts.push(
           <a
             key={match.index}
             href={linkUrl}
-            target={linkUrl.startsWith('http') ? '_blank' : '_self'}
-            rel="noopener noreferrer"
+            target={isExternal ? '_blank' : '_self'}
+            rel={isExternal ? 'noopener noreferrer' : undefined}
             style={{ color: 'var(--accent-stellar)', textDecoration: 'underline', textUnderlineOffset: 3 }}
           >
             {linkText}
@@ -465,7 +535,12 @@ export function DocumentationViewer() {
               key={cIdx}
               onClick={() => {
                 if (card.href) {
-                  if (card.href.startsWith('/')) {
+                  const cleanHref = card.href
+                    .replace(/^https?:\/\/(stellar-x402-mcp\.vercel\.app|localhost(:\d+)?)/, '');
+                  const rawSlug = cleanHref.replace(/^\/docs\/?(\?slug=)?/, '').replace(/^\//, '').split('#')[0];
+                  if (articles.some((a) => a.slug === rawSlug)) {
+                    handleNavigate(rawSlug);
+                  } else if (card.href.startsWith('/')) {
                     handleNavigate(card.href);
                   } else {
                     window.open(card.href, '_blank', 'noopener,noreferrer');
@@ -932,7 +1007,7 @@ export function DocumentationViewer() {
                         return (
                           <button
                             key={art.slug}
-                            onClick={() => setSelectedSlug(art.slug)}
+                            onClick={() => handleNavigate(art.slug)}
                             style={{
                               display: 'flex',
                               alignItems: 'center',
@@ -1071,7 +1146,7 @@ export function DocumentationViewer() {
         }}>
           {prevArticle ? (
             <button
-              onClick={() => setSelectedSlug(prevArticle.slug)}
+              onClick={() => handleNavigate(prevArticle.slug)}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -1095,7 +1170,7 @@ export function DocumentationViewer() {
 
           {nextArticle && (
             <button
-              onClick={() => setSelectedSlug(nextArticle.slug)}
+              onClick={() => handleNavigate(nextArticle.slug)}
               style={{
                 display: 'flex',
                 alignItems: 'center',
