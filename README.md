@@ -5,7 +5,7 @@
 [![Stellar Testnet](https://img.shields.io/badge/Stellar-Testnet_Deployed-3e7bfa?logo=stellar)](https://stellar.expert/explorer/testnet/contract/CDAVUNF5DHX2MWF33XDMY7WKVBSQZ3SXZDT2TPSNZPEB3Z4HHPPKTVGY)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/Vitest-155_Passing-success.svg)](test/e2e/)
-[![Documentation](https://img.shields.io/badge/Documentation-GitBook_&_Vercel-3e7bfa?logo=gitbook)](https://github.com/stellar-x402-mcp/docs)
+[![Documentation](https://img.shields.io/badge/Documentation-GitBook-3e7bfa?logo=gitbook)](https://emeditweb.gitbook.io/x402)
 
 Model Context Protocol (MCP) server, institutional developer tooling system, and multi-payment settlement framework for Stellar and Soroban.
 
@@ -20,8 +20,8 @@ For developers, evaluators, and system integrators:
 | Resource | Target Link | Description |
 |---|---|---|
 | **GitHub Repository** | [github.com/stellar-x402-mcp/monorepo](https://github.com/stellar-x402-mcp/monorepo) | Monorepo source code, contracts, and CI/CD |
-| **Documentation Repository (GitBook Ready)** | [github.com/stellar-x402-mcp/docs](https://github.com/stellar-x402-mcp/docs) | Complete GitBook and Mintlify documentation source with SUMMARY.md and 26 articles |
-| **Official Documentation Portal** | [stellar-x402-mcp.vercel.app/docs](https://stellar-x402-mcp.vercel.app/docs) | Complete interactive documentation portal, 7 payment modality guides, and error registry |
+| **Official Documentation Portal (GitBook)** | [emeditweb.gitbook.io/x402](https://emeditweb.gitbook.io/x402) | Complete interactive GitBook documentation with 26 guides across 7 payment modalities and error registry |
+| **Documentation Repository** | [github.com/stellar-x402-mcp/docs](https://github.com/stellar-x402-mcp/docs) | Complete GitBook documentation source with SUMMARY.md and native markdown |
 | **Interactive Showcase (Vercel)** | [stellar-x402-mcp.vercel.app](https://stellar-x402-mcp.vercel.app) | Live tool runner, x402 simulator, and error registry |
 | **Testnet Contract (Stellar.expert)** | [stellar.expert/testnet/contract/...](https://stellar.expert/explorer/testnet/contract/CDAVUNF5DHX2MWF33XDMY7WKVBSQZ3SXZDT2TPSNZPEB3Z4HHPPKTVGY) | Verified state channel contract and upload transactions |
 | **Stellar Laboratory (Testnet)** | [lab.stellar.org/testnet/contract/...](https://lab.stellar.org/r/testnet/contract/CDAVUNF5DHX2MWF33XDMY7WKVBSQZ3SXZDT2TPSNZPEB3Z4HHPPKTVGY) | Live Soroban RPC contract inspection harness |

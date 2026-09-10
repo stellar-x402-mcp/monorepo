@@ -65,7 +65,9 @@ export default function Home() {
               Explore MCP Tools
             </a>
             <a
-              href="/docs"
+              href="https://emeditweb.gitbook.io/x402"
+              target="_blank"
+              rel="noopener noreferrer"
               style={{
                 padding: '12px 24px',
                 borderRadius: 8,
@@ -226,7 +228,9 @@ export default function Home() {
             marginTop: 20
           }}>
             <a
-              href="/docs"
+              href="https://emeditweb.gitbook.io/x402"
+              target="_blank"
+              rel="noopener noreferrer"
               style={{
                 backgroundColor: 'rgba(0, 240, 255, 0.05)',
                 border: '1px solid rgba(0, 240, 255, 0.3)',
@@ -238,7 +242,7 @@ export default function Home() {
               }}
             >
               <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent-cyan)' }}>
-                Official Documentation Portal &rarr;
+                Official Documentation Portal (GitBook) &rarr;
               </span>
               <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
                 26 guides across 7 payment modalities, gas benchmarks, and error registry

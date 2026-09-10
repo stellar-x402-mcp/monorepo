@@ -71,7 +71,9 @@ export function Navbar() {
           </div>
 
           <a
-            href="/docs"
+            href="https://emeditweb.gitbook.io/x402"
+            target="_blank"
+            rel="noopener noreferrer"
             style={{
               padding: '6px 14px',
               borderRadius: 6,

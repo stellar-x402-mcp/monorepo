@@ -1,5 +1,17 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "cleanUrls": true
+  "cleanUrls": true,
+  "redirects": [
+    {
+      "source": "/docs",
+      "destination": "https://emeditweb.gitbook.io/x402",
+      "permanent": true
+    },
+    {
+      "source": "/docs/:path*",
+      "destination": "https://emeditweb.gitbook.io/x402",
+      "permanent": true
+    }
+  ]
 }
