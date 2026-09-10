@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 48" fill="none">
+  <!-- Icon Logomark -->
+  <rect width="44" height="44" x="2" y="2" rx="10" fill="#161b22" stroke="rgba(255, 255, 255, 0.1)" stroke-width="1"/>
+  <path d="M12 12L19 19M23 23L30 30M30 12L23 19M19 23L12 30" stroke="#3e7bfa" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="12" cy="12" r="2" fill="#00f0ff"/>
+  <circle cx="30" cy="30" r="2" fill="#00f0ff"/>
+  <circle cx="30" cy="12" r="2" fill="#3e7bfa"/>
+  <circle cx="12" cy="30" r="2" fill="#3e7bfa"/>
+  <path d="M21 9L23 19L33 21L23 23L21 33L19 23L9 21L19 19Z" fill="#ffffff"/>
+
+  <!-- Typography Dark Theme -->
+  <text x="56" y="29" fill="#ffffff" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="800" letter-spacing="-0.02em">STELLAR</text>
+  <text x="154" y="29" fill="#00f0ff" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="700" letter-spacing="-0.02em">x402</text>
+</svg>

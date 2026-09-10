@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <!-- Rounded container with subtle border -->
+  <rect width="48" height="48" rx="12" fill="#0d1117"/>
+  <rect width="46" height="46" x="1" y="1" rx="11" stroke="rgba(255, 255, 255, 0.1)" stroke-width="1"/>
+  
+  <!-- Outer payment circuit / abstract X ribbon -->
+  <path d="M14 14L22 22M26 26L34 34M34 14L26 22M22 26L14 34" stroke="#3e7bfa" stroke-width="3.5" stroke-linecap="round"/>
+  <circle cx="14" cy="14" r="2.5" fill="#00f0ff"/>
+  <circle cx="34" cy="34" r="2.5" fill="#00f0ff"/>
+  <circle cx="34" cy="14" r="2.5" fill="#3e7bfa"/>
+  <circle cx="14" cy="34" r="2.5" fill="#3e7bfa"/>
+
+  <!-- Four-pointed Stellar star at center -->
+  <path d="M24 10L26.5 21.5L38 24L26.5 26.5L24 38L21.5 26.5L10 24L21.5 21.5Z" fill="#ffffff"/>
+  <path d="M24 15L25.5 22.5L33 24L25.5 25.5L24 33L22.5 25.5L15 24L22.5 22.5Z" fill="#00f0ff" opacity="0.3"/>
+</svg>

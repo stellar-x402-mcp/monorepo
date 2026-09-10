@@ -23,20 +23,18 @@ export function Navbar() {
         gap: 16
       }}>
         <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
-          <div style={{
-            width: 36,
-            height: 36,
-            borderRadius: 8,
-            background: 'linear-gradient(135deg, #00f0ff 0%, #3e7bfa 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 'bold',
-            color: '#07090e',
-            fontSize: 18
-          }}>
-            x4
-          </div>
+          <img
+            src="/icon.svg"
+            alt="Stellar x402 Logo"
+            width={36}
+            height={36}
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 8,
+              display: 'block'
+            }}
+          />
           <div>
             <h1 style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
               stellar-x402-mcp

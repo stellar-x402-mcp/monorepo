@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo.png" width="160" height="160" alt="Stellar x402 Logo" style="border-radius: 24px;" />
+</p>
+
 # stellar-x402-mcp
 
 [![CI](https://github.com/stellar-x402-mcp/monorepo/actions/workflows/ci.yml/badge.svg)](https://github.com/stellar-x402-mcp/monorepo/actions/workflows/ci.yml)
