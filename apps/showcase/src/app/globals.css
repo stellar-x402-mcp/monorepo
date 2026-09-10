@@ -1,17 +1,21 @@
 :root {
-  --bg-primary: #07090e;
-  --bg-secondary: #0d1117;
-  --bg-card: #131823;
-  --border: #21283b;
-  --accent-cyan: #00f0ff;
-  --accent-purple: #7928ca;
-  --accent-stellar: #3e7bfa;
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-card: #21262d;
+  --bg-card-hover: #30363d;
+  --border: #30363d;
+  --border-muted: #21262d;
+  --border-subtle: rgba(240, 246, 252, 0.1);
   --text-primary: #f0f6fc;
   --text-secondary: #8b949e;
-  --text-muted: #586069;
-  --success: #2ea043;
-  --warning: #e3b341;
-  --error: #f85149;
+  --text-muted: #6e7681;
+  --accent-blue: #2f81f7;
+  --accent-blue-hover: #58a6ff;
+  --accent-green: #238636;
+  --accent-green-hover: #2ea043;
+  --accent-purple: #8957e5;
+  --accent-orange: #d29922;
+  --accent-red: #f85149;
 }
 
 * {
@@ -23,12 +27,14 @@
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
   line-height: 1.5;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-code, pre {
+code, pre, kbd, samp {
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
 }
 
@@ -37,10 +43,10 @@ a {
   text-decoration: none;
 }
 
-/* Custom scrollbar */
+/* GitHub style scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -48,15 +54,15 @@ a {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 3px;
+  background: #30363d;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  background: #484f58;
 }
 
-/* Syntax Highlighting Tokens (VS Code Dark Theme) */
+/* Syntax Highlighting */
 .token.comment,
 .token.prolog,
 .token.doctype,
@@ -88,7 +94,7 @@ a {
 .token.char,
 .token.builtin,
 .token.inserted {
-  color: #7ee787 !important;
+  color: #a5d6ff !important;
 }
 
 .token.operator,
@@ -110,8 +116,6 @@ a {
   font-weight: 500;
 }
 
-.token.regex,
-.token.important,
 .token.variable {
   color: #ffa657 !important;
 }

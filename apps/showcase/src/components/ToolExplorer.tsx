@@ -229,17 +229,21 @@ export function ToolExplorer() {
             disabled={isExecuting}
             style={{
               padding: '10px 20px',
-              borderRadius: 8,
-              background: 'linear-gradient(135deg, #00f0ff 0%, #3e7bfa 100%)',
-              color: '#07090e',
-              fontSize: 14,
-              fontWeight: 700,
+              borderRadius: 6,
+              backgroundColor: isExecuting ? '#1f6feb' : 'var(--accent-green)',
+              border: '1px solid rgba(240, 246, 252, 0.1)',
+              color: '#ffffff',
+              fontSize: 13,
+              fontWeight: 600,
               cursor: isExecuting ? 'not-allowed' : 'pointer',
-              border: 'none',
-              transition: 'opacity 0.2s ease'
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              transition: 'background-color 0.15s ease'
             }}
           >
-            {isExecuting ? 'Executing RPC Call...' : `Run ${currentTool.name}`}
+            {isExecuting ? 'Executing RPC Call...' : `Run ${currentTool.name} ↵`}
           </button>
         </div>
 

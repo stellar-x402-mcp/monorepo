@@ -6,12 +6,12 @@ export function Navbar() {
   return (
     <header style={{
       borderBottom: '1px solid var(--border)',
-      backgroundColor: 'rgba(13, 17, 23, 0.8)',
-      backdropFilter: 'blur(8px)',
+      backgroundColor: 'rgba(13, 17, 23, 0.85)',
+      backdropFilter: 'blur(12px)',
       position: 'sticky',
       top: 0,
       zIndex: 50,
-      padding: '16px 24px'
+      padding: '12px 24px'
     }}>
       <div style={{
         maxWidth: 1200,
@@ -22,51 +22,101 @@ export function Navbar() {
         flexWrap: 'wrap',
         gap: 16
       }}>
+        {/* Brand */}
         <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
           <img
             src="/icon.svg"
             alt="Stellar x402 Logo"
-            width={36}
-            height={36}
+            width={32}
+            height={32}
             style={{
-              width: 36,
-              height: 36,
-              borderRadius: 8,
+              width: 32,
+              height: 32,
+              borderRadius: 6,
               display: 'block'
             }}
           />
-          <div>
-            <h1 style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
               stellar-x402-mcp
-            </h1>
-            <p style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
-              Developer Tooling and Multi-Payment Framework
-            </p>
+            </span>
+            <span style={{
+              fontSize: 11,
+              fontWeight: 500,
+              padding: '2px 6px',
+              borderRadius: 10,
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-secondary)'
+            }}>
+              v0.1.0
+            </span>
           </div>
         </a>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+        {/* Quick Nav Anchor Links */}
+        <nav style={{ display: 'flex', alignItems: 'center', gap: 20, fontSize: 13, color: 'var(--text-secondary)' }}>
+          <a href="#sandbox" style={{ transition: 'color 0.15s ease' }} onMouseOver={(e) => (e.currentTarget.style.color = '#f0f6fc')} onMouseOut={(e) => (e.currentTarget.style.color = '#8b949e')}>
+            Sandbox
+          </a>
+          <a href="#explorer" style={{ transition: 'color 0.15s ease' }} onMouseOver={(e) => (e.currentTarget.style.color = '#f0f6fc')} onMouseOut={(e) => (e.currentTarget.style.color = '#8b949e')}>
+            Tools
+          </a>
+          <a href="#simulator" style={{ transition: 'color 0.15s ease' }} onMouseOver={(e) => (e.currentTarget.style.color = '#f0f6fc')} onMouseOut={(e) => (e.currentTarget.style.color = '#8b949e')}>
+            Simulator
+          </a>
+          <a href="#benchmarks" style={{ transition: 'color 0.15s ease' }} onMouseOver={(e) => (e.currentTarget.style.color = '#f0f6fc')} onMouseOut={(e) => (e.currentTarget.style.color = '#8b949e')}>
+            Gas Benchmarks
+          </a>
+          <a href="#errors" style={{ transition: 'color 0.15s ease' }} onMouseOver={(e) => (e.currentTarget.style.color = '#f0f6fc')} onMouseOut={(e) => (e.currentTarget.style.color = '#8b949e')}>
+            Errors
+          </a>
+        </nav>
+
+        {/* Actions */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{
-            display: 'flex',
+            display: 'inline-flex',
             alignItems: 'center',
-            gap: 8,
-            padding: '4px 12px',
-            borderRadius: 20,
-            backgroundColor: 'rgba(46, 160, 67, 0.15)',
-            border: '1px solid rgba(46, 160, 67, 0.4)',
-            fontSize: 12,
+            gap: 6,
+            padding: '3px 10px',
+            borderRadius: 12,
+            backgroundColor: 'rgba(63, 185, 80, 0.1)',
+            border: '1px solid rgba(63, 185, 80, 0.3)',
+            fontSize: 11,
             color: '#3fb950',
-            fontWeight: 600
+            fontWeight: 500
           }}>
             <span style={{
-              width: 8,
-              height: 8,
+              width: 6,
+              height: 6,
               borderRadius: '50%',
               backgroundColor: '#3fb950',
               display: 'inline-block'
             }}></span>
-            Testnet: Protocol 22 Active
+            Protocol 22
           </div>
+
+          <a
+            href="https://github.com/stellar-x402-mcp/monorepo"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              padding: '6px 12px',
+              borderRadius: 6,
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-primary)',
+              fontSize: 13,
+              fontWeight: 500,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              transition: 'all 0.15s ease'
+            }}
+          >
+            GitHub
+          </a>
 
           <a
             href="https://emeditweb.gitbook.io/x402"
@@ -75,51 +125,18 @@ export function Navbar() {
             style={{
               padding: '6px 14px',
               borderRadius: 6,
-              backgroundColor: 'rgba(0, 240, 255, 0.1)',
-              border: '1px solid rgba(0, 240, 255, 0.3)',
-              color: 'var(--accent-cyan)',
-              fontSize: 13,
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              transition: 'all 0.2s ease'
-            }}
-          >
-            Documentation
-          </a>
-
-          <a
-            href="https://github.com/stellar-x402-mcp/monorepo"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              padding: '6px 14px',
-              borderRadius: 6,
-              backgroundColor: 'var(--bg-card)',
-              border: '1px solid var(--border)',
-              fontSize: 13,
-              fontWeight: 500,
-              transition: 'all 0.2s ease'
-            }}
-          >
-            GitHub
-          </a>
-
-          <a
-            href="https://stellar.expert/explorer/testnet/contract/CDAVUNF5DHX2MWF33XDMY7WKVBSQZ3SXZDT2TPSNZPEB3Z4HHPPKTVGY"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              padding: '6px 14px',
-              borderRadius: 6,
-              background: 'linear-gradient(135deg, #3e7bfa 0%, #7928ca 100%)',
+              backgroundColor: 'var(--accent-green)',
+              border: '1px solid rgba(240, 246, 252, 0.1)',
               color: '#ffffff',
               fontSize: 13,
-              fontWeight: 600
+              fontWeight: 600,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              transition: 'background-color 0.15s ease'
             }}
           >
-            Testnet Explorer
+            Documentation &rarr;
           </a>
         </div>
       </div>

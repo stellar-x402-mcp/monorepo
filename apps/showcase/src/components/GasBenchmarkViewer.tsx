@@ -77,8 +77,8 @@ export function GasBenchmarkViewer() {
             fontWeight: 600,
             padding: '2px 8px',
             borderRadius: 4,
-            backgroundColor: 'rgba(0, 240, 255, 0.15)',
-            color: 'var(--accent-cyan)'
+            backgroundColor: 'rgba(47, 129, 247, 0.15)',
+            color: 'var(--accent-blue)'
           }}>
             Optimized Size: 5,908 Bytes
           </span>
@@ -93,7 +93,7 @@ export function GasBenchmarkViewer() {
             padding: '8px 12px',
             borderRadius: 6,
             border: '1px solid var(--border)',
-            color: 'var(--accent-cyan)',
+            color: 'var(--text-primary)',
             wordBreak: 'break-all'
           }}>
             {contractId}
@@ -124,7 +124,7 @@ export function GasBenchmarkViewer() {
             style={{
               fontSize: 12,
               fontWeight: 600,
-              color: 'var(--accent-stellar)',
+              color: 'var(--accent-blue)',
               textDecoration: 'underline'
             }}
           >
@@ -137,7 +137,7 @@ export function GasBenchmarkViewer() {
             style={{
               fontSize: 12,
               fontWeight: 600,
-              color: 'var(--accent-cyan)',
+              color: 'var(--accent-blue)',
               textDecoration: 'underline'
             }}
           >
@@ -165,7 +165,7 @@ export function GasBenchmarkViewer() {
               gap: 8
             }}
           >
-            <div style={{ fontFamily: 'monospace', fontSize: 14, fontWeight: 700, color: 'var(--accent-cyan)' }}>
+            <div style={{ fontFamily: 'monospace', fontSize: 14, fontWeight: 700, color: 'var(--accent-blue)' }}>
               {b.operation}()
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>

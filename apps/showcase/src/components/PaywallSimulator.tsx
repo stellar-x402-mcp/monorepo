@@ -126,15 +126,16 @@ export function PaywallSimulator() {
             style={{
               padding: '8px 20px',
               borderRadius: 6,
-              background: 'linear-gradient(135deg, #00f0ff 0%, #3e7bfa 100%)',
-              color: '#07090e',
+              backgroundColor: isRunning ? '#1f6feb' : 'var(--accent-green)',
+              border: '1px solid rgba(240, 246, 252, 0.1)',
+              color: '#ffffff',
               fontSize: 13,
-              fontWeight: 700,
+              fontWeight: 600,
               cursor: isRunning ? 'not-allowed' : 'pointer',
-              border: 'none'
+              transition: 'background-color 0.15s ease'
             }}
           >
-            {isRunning ? 'Simulating Pipeline...' : 'Run Simulation'}
+            {isRunning ? 'Simulating Pipeline...' : 'Run Simulation ▶'}
           </button>
         </div>
       </div>
