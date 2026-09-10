@@ -212,7 +212,7 @@ export default function Home() {
               textTransform: 'uppercase',
               letterSpacing: '0.05em'
             }}>
-              Grantfox & Drips Submission Package
+              Project & Developer Resources
             </span>
             <h2 style={{ fontSize: 22, fontWeight: 700, marginTop: 6, color: 'var(--text-primary)' }}>
               Verified Deployment and Architectural References
@@ -311,27 +311,6 @@ export default function Home() {
               </span>
             </a>
 
-            <a
-              href="https://github.com/EmeditWeb/stellar-agentic-planning"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                backgroundColor: 'var(--bg-card)',
-                border: '1px solid var(--border)',
-                borderRadius: 8,
-                padding: 16,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 6
-              }}
-            >
-              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
-                Planning Repository &rarr;
-              </span>
-              <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
-                Architecture Decision Records and 11-milestone roadmap
-              </span>
-            </a>
           </div>
         </section>
       </main>

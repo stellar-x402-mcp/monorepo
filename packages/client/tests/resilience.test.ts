@@ -7,7 +7,7 @@ import {
   pollTransactionUntilFinal,
 } from '../src/resilience.js';
 
-describe('Resilience Pipeline (IndigoPay Model)', () => {
+describe('Resilience Pipeline', () => {
   it('CircuitBreaker stays CLOSED on successful calls', async () => {
     const cb = new CircuitBreaker({ failureThreshold: 3 });
     const action = vi.fn().mockResolvedValue('success');

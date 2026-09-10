@@ -13,9 +13,9 @@ Model Context Protocol (MCP) server, institutional developer tooling system, and
 
 ---
 
-## Drips & Grantfox Submission Links
+## Relevant Project Links
 
-For evaluators, reviewers, and grant administrators:
+For developers, evaluators, and system integrators:
 
 | Resource | Target Link | Description |
 |---|---|---|
@@ -38,7 +38,7 @@ flowchart TD
         Agent["AI Agent / LLM Client"]
         Client["@stellar-mcp/agent-client"]
         Signer["InMemoryWalletSigner"]
-        Breaker["CircuitBreaker (IndigoPay)"]
+        Breaker["CircuitBreaker"]
         Tracker["BudgetTracker & Idempotency"]
     end
 
@@ -158,9 +158,9 @@ Every error code provides `code`, `slug`, `category`, `httpStatus`, `retryable` 
 
 ---
 
-## Production Resilience & IndigoPay Hardening
+## Production Resilience & Fault Tolerance
 
-Modeled after `Stellar-IndigoPay` (Issue #1098, PR #1211):
+Institutional resilience mechanisms engineered for mission-critical agent workflows:
 - **`CircuitBreaker`**: Fast-fails with 0 network calls during upstream RPC outages.
 - **Jittered Exponential Backoff**: Uniform random jitter preventing thundering-herd congestion.
 - **Finality Polling (`pollTransactionUntilFinal`)**: Strictly rejects intermediate `PENDING` states until terminal `SUCCESS` or `FAILED`.
@@ -261,7 +261,7 @@ Production-ready reference implementations illustrating monetization and consump
 
 Designed to accommodate 100+ community issues, contributors, and tooling extensions:
 - **Issue Templates**: Structured forms for [Tool Requests](.github/ISSUE_TEMPLATE/tool_request.yml), [Payment Settlement Adapters](.github/ISSUE_TEMPLATE/payment_method.yml), and [Bug Reports](.github/ISSUE_TEMPLATE/bug_report.yml).
-- **PR Template**: Rigorous [Pull Request Checklist](.github/PULL_REQUEST_TEMPLATE.md) modeled after PR #1211.
+- **PR Template**: Rigorous [Pull Request Checklist](.github/PULL_REQUEST_TEMPLATE.md) with comprehensive verification checklists.
 - **Automated CI/CD**: Continuous integration on GitHub Actions with Vercel deployment automation.
 
 ---

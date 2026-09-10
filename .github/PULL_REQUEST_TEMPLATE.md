@@ -19,7 +19,7 @@
 - Category: 
 - Retryable: [ ] Yes / [ ] No
 
-## Security & Resilience Checks (IndigoPay Standard)
+## Security & Resilience Checks
 
 - [ ] Zero Private Key Leakage: Secrets held exclusively in memory; omitted from logs and JSON serialization.
 - [ ] Hash-Level Idempotency: All payment transactions anchored on envelope hash.
