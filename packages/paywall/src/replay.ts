@@ -67,6 +67,95 @@ export class MemoryReplayStorageAdapter implements ReplayStorageAdapter {
   }
 }
 
+export interface RedisClientLike {
+  get(key: string): Promise<string | null>;
+  set(key: string, value: string, ...args: any[]): Promise<any>;
+  del(key: string): Promise<number>;
+  exists(key: string): Promise<number>;
+  dbsize?(): Promise<number>;
+  flushdb?(): Promise<any>;
+}
+
+export interface RedisReplayStorageConfig {
+  client: RedisClientLike;
+  keyPrefix?: string;
+}
+
+/**
+ * Distributed Redis Storage Adapter for ReplayProtector.
+ * Designed for clustered / multi-instance MCP paywall servers behind load balancers.
+ * Leverages atomic Redis TTL key management (SET ... EX) for automatic expiration.
+ */
+export class RedisReplayStorageAdapter implements ReplayStorageAdapter {
+  private client: RedisClientLike;
+  private keyPrefix: string;
+
+  constructor(config: RedisReplayStorageConfig) {
+    this.client = config.client;
+    this.keyPrefix = config.keyPrefix || 'x402:replay:';
+  }
+
+  private formatKey(key: string): string {
+    return `${this.keyPrefix}${key}`;
+  }
+
+  async get(key: string): Promise<{ timestamp: number; expiresAt: number } | null> {
+    try {
+      const raw = await this.client.get(this.formatKey(key));
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (Date.now() > parsed.expiresAt) {
+        await this.delete(key);
+        return null;
+      }
+      return parsed;
+    } catch {
+      return null;
+    }
+  }
+
+  async set(key: string, value: { timestamp: number; expiresAt: number }): Promise<void> {
+    const ttlSeconds = Math.max(1, Math.ceil((value.expiresAt - Date.now()) / 1000));
+    await this.client.set(this.formatKey(key), JSON.stringify(value), 'EX', ttlSeconds);
+  }
+
+  async has(key: string): Promise<boolean> {
+    try {
+      const count = await this.client.exists(this.formatKey(key));
+      return count > 0;
+    } catch {
+      return false;
+    }
+  }
+
+  async delete(key: string): Promise<boolean> {
+    try {
+      const count = await this.client.del(this.formatKey(key));
+      return count > 0;
+    } catch {
+      return false;
+    }
+  }
+
+  async clear(): Promise<void> {
+    if (typeof this.client.flushdb === 'function') {
+      await this.client.flushdb();
+    }
+  }
+
+  async size(): Promise<number> {
+    if (typeof this.client.dbsize === 'function') {
+      return await this.client.dbsize();
+    }
+    return 0;
+  }
+
+  async prune(): Promise<number> {
+    // Redis handles automatic key eviction via EX TTL
+    return 0;
+  }
+}
+
 export interface ReplayProtectorConfig {
   defaultTtlSeconds?: number;
   adapter?: ReplayStorageAdapter;

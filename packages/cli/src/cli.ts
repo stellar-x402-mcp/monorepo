@@ -18,6 +18,7 @@ program
   .option('-t, --transport <transport>', 'Transport protocol: stdio or sse', 'stdio')
   .option('-n, --network <network>', 'Stellar network: testnet or pubnet', 'testnet')
   .option('-p, --port <port>', 'HTTP/SSE server port', '3000')
+  .option('--auth-token <token>', 'Bearer token for remote SSE authorization')
   .option('--horizon-url <url>', 'Custom Horizon URL')
   .option('--rpc-url <url>', 'Custom Soroban RPC URL')
   .action(async (options) => {
