@@ -1,0 +1,69 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build, Verify & Publish Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.1.3
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Setup Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32v1-none
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile=false
+
+      - name: Build All Monorepo Packages
+        run: pnpm build
+
+      - name: Strict Typecheck
+        run: pnpm typecheck
+
+      - name: Execute Full Test Suite (163 Tests)
+        run: pnpm test:all
+
+      - name: Execute Soroban Contract Unit & Fuzzing Tests (11 Tests)
+        run: cargo test --manifest-path contracts/x402_channel/Cargo.toml
+
+      - name: Build Optimized Soroban WASM Artifact
+        run: cargo build --manifest-path contracts/x402_channel/Cargo.toml --target wasm32v1-none --release
+
+      - name: Package Release Distribution Assets
+        run: |
+          mkdir -p release-artifacts
+          cp contracts/x402_channel/target/wasm32v1-none/release/x402_channel.wasm release-artifacts/
+          (cd packages/cli && pnpm pack --pack-destination ../../release-artifacts/)
+          (cd release-artifacts && sha256sum * > SHA256SUMS.txt)
+          ls -la release-artifacts/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-artifacts/*
+          generate_release_notes: true
+          draft: false
+          prerelease: false
