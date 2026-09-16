@@ -3,6 +3,8 @@ name: Deploy Showcase to Vercel
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -41,7 +43,7 @@ jobs:
 
       - name: Deploy to Vercel Production
         uses: amondnet/vercel-action@v25
-        if: env.VERCEL_TOKEN != ''
+        if: env.VERCEL_TOKEN != '' && github.event_name == 'push'
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
