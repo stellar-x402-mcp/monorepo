@@ -1,6 +1,6 @@
 {
   "name": "@stellar-mcp/cli",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Production CLI for running, inspecting, and simulating Stellar x402 Model Context Protocol servers",
   "bin": {
     "stellar-mcp": "./dist/cli.js"
