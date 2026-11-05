@@ -327,3 +327,156 @@ export function x402Hono(options: X402MiddlewareOptions) {
     await next();
   };
 }
+
+/**
+ * Result of evaluating a Web Standard Request against x402 payment requirements.
+ */
+export type WebStandardAuthResult =
+  | { authorized: true; context: VerificationResult }
+  | { authorized: false; response: Response };
+
+/**
+ * Web Standards fetch/Request middleware for evaluating x402 payment requirements.
+ * Usable across Next.js App Router, Cloudflare Workers, Remix, Deno, and WinterCG runtimes.
+ */
+export async function x402WebStandard(
+  request: Request,
+  options: X402MiddlewareOptions
+): Promise<WebStandardAuthResult> {
+  const generator = new PaymentChallengeGenerator({
+    network: options.network || 'stellar:testnet',
+    defaultRecipient: options.recipient,
+    defaultAsset: options.asset || 'native',
+    defaultValidForSeconds: options.validForSeconds || 300,
+  });
+
+  const verifier =
+    options.verifier ||
+    new OnChainTransactionVerifier({
+      network: options.network === 'stellar:pubnet' ? 'stellar:pubnet' : 'stellar:testnet',
+    });
+
+  const replay = options.replayProtector || new ReplayProtector();
+
+  let requiredPrice = options.price;
+  if (options.pricingEngine) {
+    const url = new URL(request.url);
+    const pricingCtx: PricingContext = {
+      metadata: { url: request.url, method: request.method },
+    };
+    const rawTokens = url.searchParams.get('tokens');
+    if (rawTokens) {
+      const parsed = parseInt(rawTokens, 10);
+      if (!isNaN(parsed)) pricingCtx.tokens = parsed;
+    }
+    const rawUnits = url.searchParams.get('units');
+    if (rawUnits) {
+      const parsed = parseInt(rawUnits, 10);
+      if (!isNaN(parsed)) pricingCtx.units = parsed;
+    }
+    requiredPrice = await options.pricingEngine.calculatePrice(pricingCtx);
+  }
+
+  const headers: Record<string, string> = {};
+  request.headers.forEach((val, key) => {
+    headers[key.toLowerCase()] = val;
+  });
+
+  const proof = extractPaymentProof(headers);
+  if (!proof) {
+    const challenge = generator.createChallenge({
+      price: requiredPrice,
+      resource: options.resource || new URL(request.url).pathname,
+      description: options.description,
+    });
+    const challengeHeaders = generator.toHttpHeaders(challenge);
+    const responseHeaders = new Headers();
+    for (const [key, val] of Object.entries(challengeHeaders)) {
+      responseHeaders.set(key, val);
+    }
+    responseHeaders.set('content-type', 'application/json');
+
+    const body = JSON.stringify({
+      error: 'Payment Required',
+      message: 'This endpoint requires an HTTP 402 micro-payment settled on Stellar',
+      challenge,
+      standardError: formatErrorPayload(1120, { challenge }),
+    });
+
+    return {
+      authorized: false,
+      response: new Response(body, { status: 402, headers: responseHeaders }),
+    };
+  }
+
+  const txKey = proof.txHash || proof.envelopeXdr || '';
+  const claimRes = await replay.claim(txKey);
+  if (!claimRes.success) {
+    const responseHeaders = new Headers({ 'content-type': 'application/json' });
+    const body = JSON.stringify({
+      error: 'Payment Replay Detected',
+      message: claimRes.error,
+      standardError: formatErrorPayload(1160, { detail: claimRes.error }),
+    });
+    return {
+      authorized: false,
+      response: new Response(body, { status: 402, headers: responseHeaders }),
+    };
+  }
+
+  let verifyResult: VerificationResult;
+  if (proof.txHash) {
+    verifyResult = await verifier.verifyTransactionHash(proof.txHash, {
+      expectedRecipient: options.recipient,
+      expectedPrice: requiredPrice,
+      expectedAsset: options.asset,
+    });
+  } else {
+    verifyResult = await verifier.verifyEnvelopeXdr(proof.envelopeXdr!, {
+      expectedRecipient: options.recipient,
+      expectedPrice: requiredPrice,
+      expectedAsset: options.asset,
+    });
+  }
+
+  if (!verifyResult.verified) {
+    const responseHeaders = new Headers({ 'content-type': 'application/json' });
+    const body = JSON.stringify({
+      error: 'Invalid Payment',
+      message: verifyResult.error,
+      standardError: formatErrorPayload(1129, { detail: verifyResult.error }),
+    });
+    return {
+      authorized: false,
+      response: new Response(body, { status: 402, headers: responseHeaders }),
+    };
+  }
+
+  return { authorized: true, context: verifyResult };
+}
+
+/**
+ * Next.js App Router Route Handler wrapper for x402 micro-payments.
+ *
+ * Usage in app/api/premium/route.ts:
+ * export const GET = x402NextHandler(async (req, { payment }) => {
+ *   return Response.json({ data: "premium content", payer: payment.payer });
+ * }, { recipient: "G...", price: "0.10" });
+ */
+export function x402NextHandler<TContext = any>(
+  handler: (request: Request, context: TContext & { payment: VerificationResult }) => Promise<Response> | Response,
+  options: X402MiddlewareOptions
+) {
+  return async (request: Request, context?: TContext): Promise<Response> => {
+    const auth = await x402WebStandard(request, options);
+    if (!auth.authorized) {
+      return auth.response;
+    }
+    const mergedContext = {
+      ...(context as any),
+      payment: auth.context,
+    };
+    return handler(request, mergedContext);
+  };
+}
+
