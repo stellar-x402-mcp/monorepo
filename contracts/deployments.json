@@ -10,5 +10,44 @@
   "deployer": "GCQURZFYPPAN76FRARROTSTYVH2LQ5AP7OLDXMJPIQ7STDOM55FXWD4T",
   "explorerUrl": "https://stellar.expert/explorer/testnet/contract/CDAVUNF5DHX2MWF33XDMY7WKVBSQZ3SXZDT2TPSNZPEB3Z4HHPPKTVGY",
   "stellarLabUrl": "https://lab.stellar.org/r/testnet/contract/CDAVUNF5DHX2MWF33XDMY7WKVBSQZ3SXZDT2TPSNZPEB3Z4HHPPKTVGY",
-  "deployedAt": "2026-09-09T11:22:47Z"
+  "deployedAt": "2026-09-09T11:22:47Z",
+  "lastActivityAt": "2026-11-05T13:24:52Z",
+  "recentTransactions": [
+    {
+      "operation": "open_channel",
+      "channelId": 1,
+      "txHash": "5a10a65375184f8605e842dff3610406e5abf8756a4c885ade8e8a2c8707f8b5",
+      "explorerUrl": "https://stellar.expert/explorer/testnet/tx/5a10a65375184f8605e842dff3610406e5abf8756a4c885ade8e8a2c8707f8b5",
+      "deposit": "10000000",
+      "status": "success",
+      "timestamp": "2026-11-05T13:21:10Z"
+    },
+    {
+      "operation": "claim_payment",
+      "channelId": 1,
+      "txHash": "afea09f19b8a738ec340919ae42941d21549ab14ec7e2ae12da542be76223c29",
+      "explorerUrl": "https://stellar.expert/explorer/testnet/tx/afea09f19b8a738ec340919ae42941d21549ab14ec7e2ae12da542be76223c29",
+      "amount": "2000000",
+      "status": "success",
+      "timestamp": "2026-11-05T13:22:14Z"
+    },
+    {
+      "operation": "close_channel",
+      "channelId": 1,
+      "txHash": "3dd3434ce35cff8e3a5308a5cf2b853471497cc09152e8cf39f85e43f44508a4",
+      "explorerUrl": "https://stellar.expert/explorer/testnet/tx/3dd3434ce35cff8e3a5308a5cf2b853471497cc09152e8cf39f85e43f44508a4",
+      "refunded": "8000000",
+      "status": "success",
+      "timestamp": "2026-11-05T13:23:17Z"
+    },
+    {
+      "operation": "open_channel",
+      "channelId": 2,
+      "txHash": "13c5263e3a132465ea776dd70cafc1a42be04f5150f4a52b31328d0e984f1ce2",
+      "explorerUrl": "https://stellar.expert/explorer/testnet/tx/13c5263e3a132465ea776dd70cafc1a42be04f5150f4a52b31328d0e984f1ce2",
+      "deposit": "5000000",
+      "status": "active",
+      "timestamp": "2026-11-05T13:24:52Z"
+    }
+  ]
 }

@@ -5,6 +5,7 @@ import { generateWallet, fundWallet } from './commands/wallet.js';
 import { runSimulate } from './commands/simulate.js';
 import { runBenchmark } from './commands/benchmark.js';
 import { runDoctor } from './commands/doctor.js';
+import { runChannelInspect, runChannelHistory } from './commands/channel.js';
 
 const program = new Command();
 
@@ -78,6 +79,29 @@ program
   .option('--json', 'Output results in structured JSON format')
   .action(async (options) => {
     await runDoctor(options);
+  });
+
+const channelCommand = program
+  .command('channel')
+  .description('Manage and inspect Soroban state channels and on-chain contract transactions');
+
+channelCommand
+  .command('inspect <channelId>')
+  .description('Inspect on-chain state for a specific Soroban payment channel')
+  .option('-n, --network <network>', 'Target network: testnet or pubnet', 'testnet')
+  .option('-c, --contract <contractId>', 'Soroban channel contract address')
+  .option('--rpc-url <url>', 'Custom Soroban RPC URL')
+  .option('--json', 'Output results in structured JSON format')
+  .action(async (channelId, options) => {
+    await runChannelInspect(channelId, options);
+  });
+
+channelCommand
+  .command('history')
+  .description('Display verified on-chain transactions executed on the testnet channel contract')
+  .option('--json', 'Output results in structured JSON format')
+  .action(async (options) => {
+    await runChannelHistory(options);
   });
 
 program.parse(process.argv);
