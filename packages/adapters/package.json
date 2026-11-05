@@ -1,6 +1,6 @@
 {
   "name": "@stellar-mcp/adapters",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Agent framework adapters for Vercel AI SDK, LangChain, and LlamaIndex with auto-paying Stellar x402 integration",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

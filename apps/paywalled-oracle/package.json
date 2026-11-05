@@ -1,6 +1,6 @@
 {
   "name": "@stellar-mcp/paywalled-oracle",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Standalone reference MCP server providing monetized Stellar DEX price feeds, Soroban TVL, and swap routing via @stellar-mcp/paywall",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

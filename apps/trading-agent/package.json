@@ -1,6 +1,6 @@
 {
   "name": "@stellar-mcp/trading-agent",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Autonomous AI trading agent consuming paywalled MCP oracle feeds with auto-settlement, daily budget caps, and DEX swap execution",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

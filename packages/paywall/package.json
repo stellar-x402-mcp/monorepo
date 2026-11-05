@@ -1,6 +1,6 @@
 {
   "name": "@stellar-mcp/paywall",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "x402 Paywall decorator for monetizing Model Context Protocol (MCP) tools on Stellar",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

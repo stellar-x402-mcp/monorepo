@@ -1,6 +1,6 @@
 {
   "name": "@stellar-mcp/agent-client",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Auto-paying MCP client with budget policies for Stellar x402 tools",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

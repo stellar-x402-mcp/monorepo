@@ -12,7 +12,7 @@ const program = new Command();
 program
   .name('stellar-mcp')
   .description('Production CLI for Stellar x402 Model Context Protocol servers and agent tools')
-  .version('0.1.0');
+  .version('0.2.0');
 
 program
   .command('serve')
