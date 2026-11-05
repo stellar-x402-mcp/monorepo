@@ -4,6 +4,7 @@ import { runInspect } from './commands/inspect.js';
 import { generateWallet, fundWallet } from './commands/wallet.js';
 import { runSimulate } from './commands/simulate.js';
 import { runBenchmark } from './commands/benchmark.js';
+import { runDoctor } from './commands/doctor.js';
 
 const program = new Command();
 
@@ -66,6 +67,17 @@ program
   .description('Display gas and fee benchmarks for Stellar payment modalities')
   .action(async () => {
     await runBenchmark();
+  });
+
+program
+  .command('doctor')
+  .description('Run comprehensive diagnostic health checks on Stellar RPCs, node environment, and keypairs')
+  .option('-n, --network <network>', 'Target network: testnet or pubnet', 'testnet')
+  .option('--horizon-url <url>', 'Custom Horizon URL')
+  .option('--rpc-url <url>', 'Custom Soroban RPC URL')
+  .option('--json', 'Output results in structured JSON format')
+  .action(async (options) => {
+    await runDoctor(options);
   });
 
 program.parse(process.argv);
